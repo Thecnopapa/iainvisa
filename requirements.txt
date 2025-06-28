@@ -1,0 +1,18 @@
+# Dev environment
+pip
+autopep8
+google-cloud-storage
+
+
+
+# App
+flask
+gunicorn
+unidecode
+stripe
+
+
+requests
+firebase-admin
+
+werkzeug
