@@ -3,11 +3,11 @@ from flask import Flask, redirect
 app = Flask(__name__)
 
 @app.route("/")
-def github():
+def home():
     return redirect("https://www.linkedin.com/in/iainvisa")
 
 @app.route("/linkedin")
-def github():
+def linkedin():
     return redirect("https://www.linkedin.com/in/iainvisa")
 
 
