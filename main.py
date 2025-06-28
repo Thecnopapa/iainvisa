@@ -1,7 +1,7 @@
-from flask import Flask
+from flask import Flask, redirect
 
 app = Flask(__name__)
 
 @app.route("/")
 def hello_world():
-    return "<p>Hello, World!</p>"
+    return (redirect("https://github.com/Thecnopapa/projectDimer")
