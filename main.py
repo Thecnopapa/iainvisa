@@ -2,7 +2,7 @@ from flask import Flask, redirect
 
 app = Flask(__name__)
 
-@app.route("/")
+@app.route("/github")
 def github():
     return redirect("https://github.com/Thecnopapa")
 
