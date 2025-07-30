@@ -1,0 +1,28 @@
+
+.portfolio-page{
+	background-color: cyan;
+	width:100%;
+	height: auto;
+}
+
+#header{
+	width:100%;
+	height: 20dvh;
+	display:flex;
+	align-items: center;
+	justify-content: space-around;
+}
+
+#name{
+	font-size:5dvh;
+}
+
+#profile-pic{
+	height: 10dvh;
+	width: 10dvh;
+	border-radius: 50%;
+	background-position: center;
+	background-size:cover;
+	background-image: url("/static/pics/profile_pic.jpg")
+}
+
