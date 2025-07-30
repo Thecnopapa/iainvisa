@@ -1,7 +1,7 @@
 <html>
 
 	<head>
-		<link href='/static/portfolio.css' rel='stylesheet'>
+		<link href='/static/style/portfolio.css' rel='stylesheet'>
 
 	</head>
 
@@ -14,9 +14,26 @@
 		</div>
 		
 		<div id=content>
+			<div id=page-selector>
+				<div class=page-button onclick="goToPage('academic')">Academic</div> 
+			</div>
 
 			<div id=academic class="portfolio-page {{ 'shown' if not start or start=='academic' }}">
-				ACADEMIC
+				<div class=subheader>Structural Biologist</div>
+				<div class=description>Structural Biologist with a degree and master in Biochemistry, and a Molecular Biotechnology 
+master. I have a strong interest in the study of proteins, especially their structure and interactions. 
+I have experimental and computational experience from the two master theses, providing me with 
+a wide range of experimental and computational skills, that I can use on their own or in 
+combination. Currently I am looking for a PhD position, ideally related to the study of protein-
+protein interactions.</div>
+				<div class=topic-header>Experience</div>
+				<div class=topic-title>Master thesis</div>
+				<div class=topic-period>Jun 2023-Jun2024</div>
+				<div class=topic-description>Description</div>
+				<ul class=topic-bullets>
+					<li>Skill 1</li>
+				</ul>
+
 			</div>
 
 

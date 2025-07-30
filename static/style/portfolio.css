@@ -1,4 +1,10 @@
 
+
+body{
+
+}
+
+
 .portfolio-page{
 	background-color: cyan;
 	width:100%;
@@ -26,3 +32,18 @@
 	background-image: url("/static/pics/profile_pic.jpg")
 }
 
+#content {
+	height:auto;
+	width:95%;
+	border: black 1px;
+	border-radius: 10px;
+}
+
+#page-selector{
+	background-color: orange;
+
+}
+.page-button{
+	width: auto;
+
+}
