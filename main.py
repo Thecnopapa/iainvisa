@@ -1,10 +1,13 @@
-from flask import Flask, redirect
+from flask import Flask, redirect, render_template
+from utils import *
 
 app = Flask(__name__)
 
+@app.route("/cv")
+@app.route("/portfolio")
 @app.route("/")
 def home():
-    return redirect("https://www.linkedin.com/in/iainvisa")
+    return render_template("portfolio.html", start="academic")
 
 @app.route("/linkedin")
 def linkedin():
