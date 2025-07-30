@@ -1,0 +1,63 @@
+
+
+# add this to .bashrc
+# activate_command(){
+#   FOLDER_PATH="/..."
+#   if [ -f $FOLDER_PATH/bashrc.project ]; then
+#       source $FOLDER_PATH/bashrc.project
+	
+#   fi
+#}
+
+echo "Iainvisa folder at $FOLDER_PATH"
+cd $FOLDER_PATH
+conda activate iainvisa && echo "iainvisa environment activated"
+echo -n "Current git branch: " && git rev-parse --abbrev-ref HEAD
+
+
+
+
+alias bashrc="vim ~/.bashrc"
+alias ..="cd .."
+alias ...="cd ../.."
+alias ....="cd ../../.."
+
+
+alias top="echo -en \"\033]0;Top\a\" && top"
+
+alias please="sudo"
+
+
+
+push(){
+    GIT_BRANCH=$(git rev-parse --abbrev-ref HEAD)
+    echo "pushing to branch: origin $GIT_BRANCH"
+    git push origin $GIT_BRANCH
+}
+
+commit(){
+    echo "git commit -a"
+    git commit -a
+}
+
+test (){
+    if [[ "$*" == *"tunnel"* ]]; then
+        export START_NGROK=1
+    else
+        export START_NGROK=0
+    fi
+    if [[ "$*" == *"debug"* ]]; then
+        flask --app main run --host="0.0.0.0" --port=5000 --debug
+    else
+        flask --app main run --host="0.0.0.0" --port=5000
+    fi
+
+
+}
+deploy (){
+	cd $FOLDER_PATH && gcloud run deploy --source .
+}
+latest () {
+    cd $FOLDER_PATH && gcloud run services update-traffic --to-latest
+}
+
