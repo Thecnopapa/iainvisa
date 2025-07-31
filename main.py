@@ -5,10 +5,10 @@ app = Flask(__name__)
 
 @app.route("/cv")
 @app.route("/portfolio")
-@app.route("/")
 def home():
     return render_template("portfolio.html", start="academic")
 
+@app.route("/")
 @app.route("/linkedin")
 def linkedin():
     return redirect("https://www.linkedin.com/in/iainvisa")
