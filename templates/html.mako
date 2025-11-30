@@ -6,15 +6,10 @@
 
 
   def link(dobj: pdoc.Doc, name=None):
-    superm = dobj.supermodule()
-    while superm is not None:
-        superm = superm.supermodule()
-    print("#################")
-    print(superm)
     name = name or dobj.qualname + ('()' if isinstance(dobj, pdoc.Function) else '')
     if isinstance(dobj, pdoc.External) and not external_links:
         return name
-    url = dobj.url(relative_to=superm, link_prefix=link_prefix,
+    url = dobj.url(relative_to=module, link_prefix=link_prefix,
                    top_ancestor=not show_inherited_members)
     return f'<a title="{dobj.refname}" href="{url}">{name}</a>'
 

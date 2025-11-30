@@ -54,8 +54,9 @@ def bioiain_docs(path=None):
     import builtins
     #builtins.__import__(f"bioiain.{".".join(path.split("/"))}")
     import bioiain.visualisation
-    pdoc.tpl_lookup.directories.append("templates")
-    version = bioiain.__version__
+    pdoc.tpl_lookup.directories = ["templates"] + pdoc.tpl_lookup.directories
+
+
 
     context = pdoc.Context()
     bp_mod = pdoc.Module(pdoc.import_module("Bio.PDB", skip_errors=True), skip_errors=True, context=context)
@@ -93,9 +94,10 @@ def bioiain_docs(path=None):
                 break
         if not found:
             flask.abort(404)
-    print("MODULE:", mod.name)
+    print("MODULE:", mod)
     print("SUBMODULES:", mod.submodules())
-    return mod.html(version=version)
+
+    return mod.html()
 
 
 
