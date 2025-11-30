@@ -33,6 +33,14 @@ def projectDimer():
 def projectDimerPPT():
     return redirect("https://docs.google.com/presentation/d/1HGT1u9emPj-3RmbbPaktof1PfAYAaBjy0TO_0LxUf3E/edit?usp=sharing")
 
+
+
+@app.route("/Bio/<path:path>")
+def redirect_biopython(path):
+    return redirect("https://biopython.org/")
+
+
+
 @app.route("/bioiain/")
 @app.route("/bioiain/<path:path>")
 def bioiain_docs(path=None):
@@ -43,8 +51,9 @@ def bioiain_docs(path=None):
     import bioiain.visualisation
     pdoc.tpl_lookup.directories.append("templates")
 
-
-    mod = pdoc.Module(pdoc.import_module("bioiain", skip_errors=True), skip_errors=True)
+    context = pdoc.Context()
+    bp_mod = pdoc.Module(pdoc.import_module("Bio.PDB", skip_errors=True), skip_errors=True, context=context)
+    mod = pdoc.Module(pdoc.import_module("bioiain", skip_errors=True), skip_errors=True, context=context)
     pdoc.link_inheritance()
     if path is None:
         return mod.html()
@@ -60,6 +69,9 @@ def bioiain_docs(path=None):
     except ModuleNotFoundError:
         print(request.__dict__)
         return redirect(request.referrer)
+
+
+
 
     while mod.name != target_mod:
         found = False
