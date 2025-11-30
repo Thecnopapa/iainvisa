@@ -37,10 +37,15 @@ def projectDimerPPT():
 
 @app.route("/Bio/<path:path>")
 def redirect_biopython(path):
-    return redirect("https://biopython.org/")
+    target = "Bio." + ".".join([p for p in path.split("/") if p not in ["", "index.html"]])
+    print(target)
+    import Bio
+    version = Bio.__version__
+    return redirect(f"https://biopython.org/docs/{version}/api/{target}")
 
 
 
+@app.route("/bioiain")
 @app.route("/bioiain/")
 @app.route("/bioiain/<path:path>")
 def bioiain_docs(path=None):
@@ -50,6 +55,7 @@ def bioiain_docs(path=None):
     #builtins.__import__(f"bioiain.{".".join(path.split("/"))}")
     import bioiain.visualisation
     pdoc.tpl_lookup.directories.append("templates")
+    version = bioiain.__version__
 
     context = pdoc.Context()
     bp_mod = pdoc.Module(pdoc.import_module("Bio.PDB", skip_errors=True), skip_errors=True, context=context)
@@ -89,7 +95,7 @@ def bioiain_docs(path=None):
             flask.abort(404)
     print("MODULE:", mod.name)
     print("SUBMODULES:", mod.submodules())
-    return mod.html()
+    return mod.html(version=version)
 
 
 
