@@ -1,2 +1,2 @@
-link_prefix="bioiain"
-show_inherited_members = True
+link_prefix = '/bioiain'
+show_inherited_members = False
