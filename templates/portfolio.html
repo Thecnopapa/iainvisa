@@ -1,42 +1,88 @@
 <html>
 
 	<head>
-		<link href='/static/style/portfolio.css' rel='stylesheet'>
+        <link href='/static/style/portfolio.css' as='style' rel='preload'>
+        <link href='/static/scripts/portfolio.js' as='script' rel='preload'>
 
+
+		<link href='/static/style/portfolio.css' rel='stylesheet'>
+        <script defer type="text/javascript" src="/static/scripts/portfolio.js"></script>
+        <title>Portfolio: {{ start }}</title>
 	</head>
 
 
 	<body>
-		<div id=header>
-			<div id=profile-pic></div>
-			<div id=name>Iain Visa</div>
+		<div id=header class="page-changer">
+			<div id=profile-pic class="page-changer" onclick="window.location.href='https://www.linkedin.com/in/iainvisa'"></div>
+			<h1 id=name onclick="window.href='/'" >Iain Visa</h1>
 			<div style=width:10dvh;></div>
 		</div>
-		
+
 		<div id=content>
 			<div id=page-selector>
-				<div class=page-button onclick="goToPage('academic')">Academic</div> 
-			</div>
-
-			<div id=academic class="portfolio-page {{ 'shown' if not start or start=='academic' }}">
-				<div class=subheader>Structural Biologist</div>
-				<div class=description>Structural Biologist with a degree and master in Biochemistry, and a Molecular Biotechnology 
-master. I have a strong interest in the study of proteins, especially their structure and interactions. 
-I have experimental and computational experience from the two master theses, providing me with 
-a wide range of experimental and computational skills, that I can use on their own or in 
-combination. Currently I am looking for a PhD position, ideally related to the study of protein-
-protein interactions.</div>
-				<div class=topic-header>Experience</div>
-				<div class=topic-title>Master thesis</div>
-				<div class=topic-period>Jun 2023-Jun2024</div>
-				<div class=topic-description>Description</div>
-				<ul class=topic-bullets>
-					<li>Skill 1</li>
-				</ul>
+				<button class="page-button page-academic {{ 'current' if not start or start=='academic' }}" onclick="goToPage('academic')">Academic</button>
+                <button class="page-button page-developer  {{ 'current' if start=='developer' }}" onclick="goToPage('developer')">Developer</button>
+                <button class="page-button page-other {{ 'current' if start=='other' }}" onclick="goToPage('other')">Other</button>
 
 			</div>
 
+			<div id=academic class="portfolio-page page-academic {{ 'current' if not start or start=='academic' }}">
+				<h2 class=subheader>Structural Biologist</h2>
+				<p class=description>PhD Student with a degree and master in Biochemistry, and a Molecular Biotechnology
+master. I have a strong interest in the study of proteins, especially their structure and interactions, topic in which I am developing my PhD.<br><br>
+I have experimental and computational experience from the two master theses, providing me with
+a wide range of experimental and computational skills, that I can use on their own or in
+combination.
+                    <br><br>Currently a PhD Student at Universitat de Barcelona in Eva Estébanez's research group working on Nuclear Receptor multimetric assemblies with a computational and Machine Learning approach, in collaboration with Isabel Usón's research group. Currently I am looking for a PhD position, ideally related to the study of protein-
+protein interactions.</p>
+                <h3 class=topic-header>Experience</h3>
+                <div class="topic-list">
+                    <h4 class=topic-title>Master thesis</h4>
+                    <h5 class=topic-period>Jun 2023-Jun2024</h5>
+                    <p class=topic-description>Description</p>
+                    <ul class=topic-bullets>
+                        <li>Skill 1</li>
+                    </ul>
+                </div>
 
+			</div>
+            <div id=developer class="portfolio-page page-developer {{ 'current' if not start or start=='developer' }}">
+                <h2 class=subheader>Website Developer</h2>
+                <p class=description>Web developer as a hobby, back-end, front-end databases, authentication... <br>
+                All vanilla HTML CSS and JS, with a flask backend and hosted with google. Still learning tho.</p>
+                <h3 class=topic-header>Successfull projects so far</h3>
+                <div class="topic-list">
+                        <h4 class=topic-title>PANSON Joieria</h4>
+                        <h5 class=topic-period>Apr 2024-Nov 2024 (still running)</h5>
+                        <a class=topic-link href="https://pansonjoieria.com">pansonjoieria.com</a>
+                        <p class=topic-description>Website and online shop for the homemade jewelry brand PANSON. The project features:</p>
+         				<ul class=topic-bullets>
+         					<li>Front-end (mostly designed by client): HTML, CSS, and JS (all vanilla)</li>
+                            <li>Back-end: Flask (wit Jinja templates)</li>
+                            <li>Hosting: Google Cloud</li>
+                            <li>Database: Firebase/Firestore/Google Cloud</li>
+                            <li>Admin: Dashboards with direct access to the website contents and database</li>
+                            <li>Online shop: Integrated Stripe API with for seamless payments</li>
+                            <li>Workflow integration: Integrated tracking of orders with Trello</li>
+                            <li>Domains: Custom domain setup and admin + email configuration</li>
+                            <li>Running cost: 1€/month!</li>
+         				</ul>
+                </div>
+            </div>
+
+
+            <div id=other class="portfolio-page page-other {{ 'current' if not start or start=='other' }}">
+         				<h2 class=subheader>Other side projects</h2>
+         				<p class=description>Here are some other projects that I found interesting at some point. Mostly late-night ideas. All recent as I've been coding since 2024.</p>
+         				<h3 class=topic-header>Successfull Projects so far</h3>
+         				<h4 class=topic-title>PANSON Joieria</h4>
+         				<h5 class=topic-period>Apr 2024-Nov 2024 (still running)</h5>
+         				<p class=topic-description>Website and online shop for the homemade jewelry brand PANSON.</p>
+         				<ul class=topic-bullets>
+         					<li>Skill 1</li>
+         				</ul>
+
+         			</div>
 
 		</div>
 

@@ -6,12 +6,24 @@ from utils import *
 
 app = Flask(__name__)
 
+@app.route("/")
 @app.route("/cv")
-@app.route("/portfolio")
-def home():
+@app.route("/portfolio/")
+@app.route("/portfolio/academic")
+def acedemic_home():
     return render_template("portfolio.html", start="academic")
 
-@app.route("/")
+@app.route("/portfolio/developer")
+def developer_home():
+    return render_template("portfolio.html", start="developer")
+
+@app.route("/portfolio/other")
+def other_home():
+    return render_template("portfolio.html", start="other")
+
+
+
+
 @app.route("/linkedin")
 def linkedin():
     return redirect("https://www.linkedin.com/in/iainvisa")
