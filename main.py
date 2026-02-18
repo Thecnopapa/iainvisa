@@ -168,9 +168,10 @@ def bioiain_docs(path=None):
 
 
 
-@app.route("/files/await/<key>")
-def await_files(key=None):
+@app.route("/files/await")
+def await_files():
 
+    key = request.args.get('key', None)
     with open(".secure/FILE_SEND_KEY") as f:
         file_send_key = f.read()
 
@@ -183,36 +184,24 @@ def await_files(key=None):
 
 
 
-@app.route("/files/download/<key>/<fname>", methods=['GET', 'POST'])
+@app.route("/files/download/<fname>")
 def download_file(key = None, fname=None):
+
+
     with open(".secure/FILE_SEND_KEY") as f:
         file_send_key = f.read()
 
     print("Downloading file...")
 
+    key = request.args.get('key', None)
 
-    if request.method == "POST":
-        print(request.json)
-
-        key = request.json.get("key", None)
-        if key == file_send_key and key is not None:
-
-            fname = secure_filename(request.json.get("fname"))
-            fpath = os.path.join(app.config['UPLOAD_FOLDER'], fname)
-            return send_from_directory(app.config['UPLOAD_FOLDER'], fname), 200
-
-        else:
-            return f"INVALID KEY: {key}", 403
+    if key == file_send_key and key is not None:
+        fname = secure_filename(fname)
+        fpath = os.path.join(app.config['UPLOAD_FOLDER'], fname)
+        return send_file(fpath)
     else:
-        if key == file_send_key and key is not None:
-            fname = secure_filename(fname)
-            fpath = os.path.join(app.config['UPLOAD_FOLDER'], fname)
-            return send_file(fpath)
-        else:
-            return f"INVALID KEY: {key}", 403
+        return f"INVALID KEY: {key}", 403
 
-
-    return "", 200
 
 
 
@@ -224,7 +213,8 @@ def send_files():
 
     req = request
 
-    key = request.headers.get("key", None)
+    key = request.args.get('key', None)
+
 
     with open(".secure/FILE_SEND_KEY") as f:
         file_send_key = f.read()
@@ -249,7 +239,8 @@ def send_files():
                 chunk = request.stream.read(chunk_size)
                 f.write(chunk)
                 bytes_left -= len(chunk)
-                print(f"Uploading file... {(total_bytes-bytes_left)/total_bytes*100:3.0f}%")
+                if not FETCH_SECRETS:
+                    print(f"Uploading file... {(total_bytes-bytes_left)/total_bytes*100:3.0f}%", end="\r")
 
 
         return f"\nFile uploaded! ({(total_bytes-bytes_left)/total_bytes*100:3.0f}% of {total_bytes/1000000:.2f} MB)\n", 200
