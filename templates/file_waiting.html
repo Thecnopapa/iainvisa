@@ -21,20 +21,34 @@
     <span><input type="password" id="password" placeholder="Password" /><button class="log-in" onclick="login()">Log In</button></span>
 
     <h1>Waiting for files to be sent...</h1>
-    <h2>Private Files</h2>
-    {% for file in files %}
-    <span>File: <b>{{file}}</b>
-        <button class="file-button open" onclick="goToFile('{{ file }}')">Open</button>
-        <button class="file-button download" onclick="goToFile('{{ file }}', true)">Download</button>
-    </span>
-    {% endfor %}
+    {%  if files %}
+        <h2>Private Files</h2>
+
+        {% for k, fs in files.items() %}
+            {% for file in fs %}
+            <span class="{{ k }}">File: <b>{{file}}</b>
+                <button class="file-button open" onclick="goToFile('{{ file }}', false, false, '{{ k }}')">Open</button>
+                <button class="file-button download" onclick="goToFile('{{ file }}', true, false, '{{ k }}')">Download</button>
+                {% if k == "slow" %}
+                <button class="file-button delete" onclick="deleteFile('{{ file }}', false)">Delete</button>
+                {% endif %}
+            </span>
+            {% endfor %}
+        {% endfor %}
+    {% endif %}
     <h2>Public Files</h2>
-    {% for file in public_files %}
-        <span>File: <b>{{file}}</b>
-            <button class="file-button open" onclick="goToPublicFile('{{ file }}')">Open</button>
-            <button class="file-button download" onclick="goToPublicFile('{{ file }}', true)">Download</button>
+    {% for k, pfs in public_files.items() %}
+        {% for file in pfs %}
+        <span class="{{ k }}">File: <b>{{file}}</b>
+            <button class="file-button open" onclick="goToFile('{{ file }}', false, true, '{{ k }}')">Open</button>
+            <button class="file-button download" onclick="goToFile('{{ file }}', true, true, '{{ k }}')">Download</button>
+            {% if k == "slow" %}
+            <button class="file-button delete" onclick="deleteFile('{{ file }}', true)">Delete</button>
+            {% endif %}
         </span>
         {% endfor %}
+    {% endfor %}
+
 
 
 

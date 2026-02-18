@@ -7,3 +7,10 @@ body{
 	width: fit-content;
 	margin-bottom: 1em
 }
+
+
+
+.fast{
+	color: darkviolet;
+	font-style: italic;
+}

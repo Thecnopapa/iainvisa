@@ -37,7 +37,8 @@ if FETCH_SECRETS:
         print(" * Failed to load secrets")
         raise
 
-
+storage_client = storage.Client(project="iainvisa")
+db = storage_client.bucket("iv_fts")
 
 
 app = Flask(__name__)
@@ -48,6 +49,9 @@ app.config['UPLOAD_FOLDER'] = "uploads"
 app.config['PUBLIC_UPLOAD_FOLDER'] = "public_uploads"
 os.makedirs(app.config['UPLOAD_FOLDER'], exist_ok=True)
 os.makedirs(app.config['PUBLIC_UPLOAD_FOLDER'], exist_ok=True)
+app.config['DOWNLOAD_FOLDER'] = "downloads"
+os.makedirs(app.config['DOWNLOAD_FOLDER'], exist_ok=True)
+
 
 
 
@@ -180,15 +184,30 @@ def await_files():
     key = request.args.get('key', None)
     with open(".secure/FILE_SEND_KEY") as f:
         file_send_key = f.read()
+    DB_TIMEOUT = False
+    public_files = {
+        "fast": os.listdir(app.config['PUBLIC_UPLOAD_FOLDER'])
+    }
+    try:
+        public_files["slow"] = [b.name.split("/")[-1] for b in db.list_blobs(prefix="public/", include_folders_as_prefixes=False) if not b.name.endswith("/")]
+    except:
+        DB_TIMEOUT=True
 
     if key == file_send_key and key is not None:
-        return render_template("file_waiting.html", request=request, files=os.listdir(app.config['UPLOAD_FOLDER']), public_files=os.listdir(app.config['PUBLIC_UPLOAD_FOLDER']))
+        files = {
+            "fast": os.listdir(app.config['UPLOAD_FOLDER']),
+        }
+        try:
+            files["slow"] = [b.name.split("/")[-1] for b in db.list_blobs(prefix="private/", include_folders_as_prefixes=False) if not b.name.endswith("/")]
+        except:
+            DB_TIMEOUT = True
+        return render_template("file_waiting.html", request=request, files=files, public_files=public_files, DB_TIMEOUT=DB_TIMEOUT)
     else:
-        return render_template("file_waiting.html", request=request, files =[], public_files=os.listdir(app.config['PUBLIC_UPLOAD_FOLDER']))
+        return render_template("file_waiting.html", request=request, files=None, public_files=public_files, DB_TIMEOUT=DB_TIMEOUT)
 
 
 @app.route("/files/download/<fname>/")
-def download_file(key = None, fname=None):
+def download_file(fname=None):
 
 
     with open(".secure/FILE_SEND_KEY") as f:
@@ -217,13 +236,71 @@ def download_public_file(fname=None):
     return send_file(fpath)
 
 
+@app.route("/storage/download/<fname>/")
+def download_file_storage(fname=None):
+
+
+    with open(".secure/FILE_SEND_KEY") as f:
+        file_send_key = f.read()
+
+    print("Downloading file...")
+
+    key = request.args.get('key', None)
+
+    if key == file_send_key and key is not None:
+        fname = secure_filename(fname)
+        blob = db.blob(f"private/{fname}")
+        path = os.path.join(app.config['DOWNLOAD_FOLDER'], fname)
+        open(path, "wb").write(blob.download_as_bytes())
+        return send_file(path, download_name=fname)
+    else:
+        #return f"INVALID KEY: {key}", 403
+        return render_template("login.html")
+
+@app.route("/storage/download/public/<fname>/")
+def download_public_file_storage(fname=None):
+
+    print("Downloading file...")
+
+    fname = secure_filename(fname)
+    blob = db.blob(f"public/{fname}")
+    path = os.path.join(app.config['DOWNLOAD_FOLDER'], fname)
+    open(path, "wb").write(blob.download_as_bytes())
+    return send_file(path, download_name=fname)
+
+@app.post("/storage/delete")
+def delete_file_storage():
+
+
+    with open(".secure/FILE_SEND_KEY") as f:
+        file_send_key = f.read()
+
+    print("Deleting file...")
+
+    key = request.json.get('key', None)
+    public = request.json.get('public', False)
+    fname = secure_filename(request.json.get('fname', False))
+
+
+    if key == file_send_key and key is not None:
+        fname = secure_filename(fname)
+        if public:
+            blob = db.blob(f"public/{fname}")
+        else:
+            blob = db.blob(f"private/{fname}")
+        blob.delete()
+        return "Deleted file", 200
+    else:
+        return f"INVALID KEY: {key}", 403
+
+
+
 
 
 @app.post("/files/send")
 def send_files():
 
     key = request.args.get('key', "")
-
 
     with open(".secure/FILE_SEND_KEY") as f:
         file_send_key = f.read()
@@ -237,6 +314,7 @@ def send_files():
             fname="upload.file"
 
         public = int(request.headers.get('public', False))
+        store = int(request.headers.get('store', False))
 
         total_bytes = int(request.headers.get('content-length'))
         bytes_left = int(request.headers.get('content-length'))
@@ -246,8 +324,8 @@ def send_files():
         target_folder = app.config['UPLOAD_FOLDER']
         if public:
             target_folder = app.config['PUBLIC_UPLOAD_FOLDER']
-
-        with open(os.path.join(target_folder, fname), "wb") as f:
+        path = os.path.join(target_folder, fname)
+        with open(path, "wb") as f:
             while bytes_left > 0:
                 chunk = request.stream.read(chunk_size)
                 f.write(chunk)
@@ -255,9 +333,21 @@ def send_files():
                 if not FETCH_SECRETS:
                     print(f"Uploading file... {(total_bytes-bytes_left)/total_bytes*100:3.0f}%", end="\r")
 
-        download_link = f"{request.host_url}/files/download/{fname}"
+        if store:
+
+            bucket = "private"
+            if public:
+                bucket = "public"
+            new_blob = db.blob(f"{bucket}/{fname}")
+            new_blob.upload_from_filename(path)
+            prefix="storage"
+            os.remove(path)
+        else:
+            prefix="files"
+
+        download_link = f"{request.host_url}/{prefix}/download/{fname}"
         if public:
-            download_link = f"{request.host_url}/files/download/public/{fname}"
+            download_link = f"{request.host_url}/{prefix}/download/public/{fname}"
         return f"\n * [200] File uploaded! ({(total_bytes-bytes_left)/total_bytes*100:3.0f}% of {total_bytes/1000000:.2f} MB)\n * Download from: {download_link}\n", 200
 
     else:
