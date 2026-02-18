@@ -20,20 +20,20 @@ async function goToFile(fname, download=false, publicfile=false, storage_type="f
 	PAGE_IDLE = false;
 	let url = new URL(window.location.href);
 	let key = url.searchParams.get("key");
+	let prefix="files"
+	if (storage_type==="fast"){
+		prefix="files"
+	} else if (storage_type==="slow"){
+		prefix="storage"
+	}
 	if (download){
 		const link = document.createElement("a");
-		link.href = "/files/download/" + fname +"?key=" + key;
+		link.href = "/"+prefix+"/download/" + fname +"?key=" + key;
 		link.download = fname;
 		link.click();
 
 	} else {
-		let prefix="files"
-		console.log(storage_type)
-		if (storage_type==="fast"){
-			prefix="files"
-		} else if (storage_type==="slow"){
-			prefix="storage"
-		}
+
 		window.open("/"+prefix+"/download/" + fname +"?key=" + key, '_blank').focus();
 
 	}
