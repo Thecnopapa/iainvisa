@@ -28,14 +28,22 @@ async function goToFile(fname, download=false, publicfile=false, storage_type="f
 	}
 	if (download){
 		const link = document.createElement("a");
-		link.href = "/"+prefix+"/download/" + fname +"?key=" + key;
+		if (publicfile){
+			link.href = "/"+prefix+"/download/public/" + fname +"?key=" + key;
+
+		} else{
+			link.href = "/"+prefix+"/download/" + fname +"?key=" + key;
+		}
 		link.download = fname;
 		link.click();
 
 	} else {
+		if (publicfile){
+			window.open("/"+prefix+"/download/public/" + fname +"?key=" + key, '_blank').focus();
 
-		window.open("/"+prefix+"/download/" + fname +"?key=" + key, '_blank').focus();
-
+		} else {
+			window.open("/"+prefix+"/download/" + fname +"?key=" + key, '_blank').focus();
+		}
 	}
 
 	PAGE_IDLE = true;
