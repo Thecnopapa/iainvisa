@@ -4,6 +4,7 @@
 
 #DEV
 .idea
+__pycache__
 
 
 #SECRETS

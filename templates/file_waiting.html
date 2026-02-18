@@ -1,0 +1,34 @@
+<html>
+
+	<head>
+        <link href='/static/style/files.css' as='style' rel='preload'>
+        <link href='/static/scripts/files.js' as='script' rel='preload'>
+
+
+		<link href='/static/style/files.css' rel='stylesheet'>
+        <script defer type="text/javascript" src="/static/scripts/files.js"></script>
+        <title>Portfolio: {{ start }}</title>
+	</head>
+
+
+	<body>
+
+
+
+
+
+		<h1>Waiting for files to be sent...</h1>
+
+			{% for file in files %}
+			<button class="file-link" onclick="downloadFile('{{file}}')">Download File: <b>{{file}}</b></button>
+			{% endfor %}
+
+
+
+
+
+
+	</body>
+
+
+</html>

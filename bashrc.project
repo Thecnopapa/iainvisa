@@ -227,7 +227,7 @@ checkout(){
 # PROJECT SPECIFIC AFTER THIS
 
 
-test (){
+testing (){
     if [[ "$*" == *"tunnel"* ]]; then
         export START_NGROK=1
     else
