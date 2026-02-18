@@ -1,10 +1,65 @@
 import os, sys, json, subprocess
 
 import flask
-from flask import Flask, redirect, render_template, send_from_directory,request
+from flask import Flask, redirect, render_template, send_from_directory, request, send_file
 from utils import *
+from werkzeug.utils import secure_filename
+
+
+
+
+
+
+FETCH_SECRETS = bool(int(os.environ.get("FETCH_SECRETS", 1)))
+
+if FETCH_SECRETS:
+    from google.cloud import secretmanager
+    from google.oauth2 import service_account
+    print(" * Updating secrets")
+    os.makedirs(".secure", exist_ok=True)
+    try:
+        secret_client = secretmanager.SecretManagerServiceClient()
+        print(" * Secret manager initialised")
+
+        try:
+            with open(".secure/FLASK_KEY", "w") as f:
+                f.write(secret_client.access_secret_version(request={"name": "projects/449194795494/secrets/FLASK_KEY/versions/latest"}).payload.data.decode("UTF-8"))
+        except:
+            print(" * Failed to read FLASK_KEY")
+            raise
+
+        try:
+            with open(".secure/FILE_SEND_KEY", "w") as f:
+                f.write(secret_client.access_secret_version(request={"name": "projects/449194795494/secrets/FILE_SEND_KEY/versions/latest"}).payload.data.decode("UTF-8"))
+        except:
+            print(" * Failed to read FILE_SEND_KEY")
+    except:
+        print(" * Failed to load secrets")
+        raise
+
+
+
 
 app = Flask(__name__)
+with open(".secure/FLASK_KEY") as f:
+    app.config["SECRET_KEY"] = f.read()
+
+app.config['UPLOAD_FOLDER'] = "uploads"
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 @app.route("/")
 @app.route("/cv")
@@ -113,5 +168,91 @@ def bioiain_docs(path=None):
 
 
 
+@app.route("/files/await/<key>")
+def await_files(key=None):
+
+    with open(".secure/FILE_SEND_KEY") as f:
+        file_send_key = f.read()
+
+    if key == file_send_key and key is not None:
+
+        return render_template("file_waiting.html", files = os.listdir("uploads"))
+
+    else:
+        return f"INVALID KEY: {key}", 403
 
 
+
+@app.route("/files/download/<key>/<fname>", methods=['GET', 'POST'])
+def download_file(key = None, fname=None):
+    with open(".secure/FILE_SEND_KEY") as f:
+        file_send_key = f.read()
+
+    print("Downloading file...")
+
+
+    if request.method == "POST":
+        print(request.json)
+
+        key = request.json.get("key", None)
+        if key == file_send_key and key is not None:
+
+            fname = secure_filename(request.json.get("fname"))
+            fpath = os.path.join(app.config['UPLOAD_FOLDER'], fname)
+            return send_from_directory(app.config['UPLOAD_FOLDER'], fname), 200
+
+        else:
+            return f"INVALID KEY: {key}", 403
+    else:
+        if key == file_send_key and key is not None:
+            fname = secure_filename(fname)
+            fpath = os.path.join(app.config['UPLOAD_FOLDER'], fname)
+            return send_file(fpath)
+        else:
+            return f"INVALID KEY: {key}", 403
+
+
+    return "", 200
+
+
+
+
+
+
+@app.post("/files/send")
+def send_files():
+
+    req = request
+
+    key = request.headers.get("key", None)
+
+    with open(".secure/FILE_SEND_KEY") as f:
+        file_send_key = f.read()
+
+    os.makedirs(app.config['UPLOAD_FOLDER'], exist_ok=True)
+
+    if key == file_send_key and key is not None:
+        print(request.headers)
+        fname = secure_filename(request.headers.get("fname", "upload.file"))
+        if fname == "":
+            fname="upload.file"
+
+        total_bytes = int(request.headers.get('content-length'))
+        bytes_left = int(request.headers.get('content-length'))
+        chunk_size = 5120
+
+
+
+
+        with open(os.path.join(app.config['UPLOAD_FOLDER'], fname), "wb") as f:
+            while bytes_left > 0:
+                chunk = request.stream.read(chunk_size)
+                f.write(chunk)
+                bytes_left -= len(chunk)
+                print(f"Uploading file... {(total_bytes-bytes_left)/total_bytes*100:3.0f}%")
+
+
+        return f"\nFile uploaded! ({(total_bytes-bytes_left)/total_bytes*100:3.0f}% of {total_bytes/1000000:.2f} MB)\n", 200
+
+    else:
+        return f"INVALID KEY: {key}", 403

@@ -2,5 +2,14 @@
 
 
 
-
+#DEV
 .idea
+
+
+#SECRETS
+secure
+.secure
+
+
+#OTHER
+uploads
