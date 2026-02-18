@@ -7,21 +7,34 @@
 
 		<link href='/static/style/files.css' rel='stylesheet'>
         <script defer type="text/javascript" src="/static/scripts/files.js"></script>
-        <title>Portfolio: {{ start }}</title>
+        <title>File Transfer: Await</title>
 	</head>
 
+    <script>
+        PAGE_IDLE = true;
+    </script>
 
 	<body>
 
 
 
+    <span><input type="password" id="password" placeholder="Password" /><button class="log-in" onclick="login()">Log In</button></span>
 
-
-		<h1>Waiting for files to be sent...</h1>
-
-			{% for file in files %}
-			<button class="file-link" onclick="downloadFile('{{file}}')">Download File: <b>{{file}}</b></button>
-			{% endfor %}
+    <h1>Waiting for files to be sent...</h1>
+    <h2>Private Files</h2>
+    {% for file in files %}
+    <span>File: <b>{{file}}</b>
+        <button class="file-button open" onclick="goToFile('{{ file }}')">Open</button>
+        <button class="file-button download" onclick="goToFile('{{ file }}', true)">Download</button>
+    </span>
+    {% endfor %}
+    <h2>Public Files</h2>
+    {% for file in public_files %}
+        <span>File: <b>{{file}}</b>
+            <button class="file-button open" onclick="goToPublicFile('{{ file }}')">Open</button>
+            <button class="file-button download" onclick="goToPublicFile('{{ file }}', true)">Download</button>
+        </span>
+        {% endfor %}
 
 
 

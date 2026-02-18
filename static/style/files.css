@@ -3,7 +3,7 @@ body{
 	flex-direction:column;
 	width: fit-content;
 }
-button{
+.file-button{
 	width: fit-content;
 	margin-bottom: 1em
 }

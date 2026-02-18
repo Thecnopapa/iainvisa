@@ -4,7 +4,7 @@ import flask
 from flask import Flask, redirect, render_template, send_from_directory, request, send_file
 from utils import *
 from werkzeug.utils import secure_filename
-
+from google.cloud import storage
 
 
 
@@ -45,7 +45,10 @@ with open(".secure/FLASK_KEY") as f:
     app.config["SECRET_KEY"] = f.read()
 
 app.config['UPLOAD_FOLDER'] = "uploads"
+app.config['PUBLIC_UPLOAD_FOLDER'] = "public_uploads"
 os.makedirs(app.config['UPLOAD_FOLDER'], exist_ok=True)
+os.makedirs(app.config['PUBLIC_UPLOAD_FOLDER'], exist_ok=True)
+
 
 
 
@@ -168,8 +171,10 @@ def bioiain_docs(path=None):
     return mod.html()
 
 
-
-@app.route("/files/await")
+@app.route("/files/")
+def redirect_to_await():
+    return redirect("/files/await/")
+@app.route("/files/await/")
 def await_files():
 
     key = request.args.get('key', None)
@@ -177,15 +182,12 @@ def await_files():
         file_send_key = f.read()
 
     if key == file_send_key and key is not None:
-
-        return render_template("file_waiting.html", files = os.listdir("uploads"))
-
+        return render_template("file_waiting.html", request=request, files=os.listdir(app.config['UPLOAD_FOLDER']), public_files=os.listdir(app.config['PUBLIC_UPLOAD_FOLDER']))
     else:
-        return f"INVALID KEY: {key}", 403
+        return render_template("file_waiting.html", request=request, files =[], public_files=os.listdir(app.config['PUBLIC_UPLOAD_FOLDER']))
 
 
-
-@app.route("/files/download/<fname>")
+@app.route("/files/download/<fname>/")
 def download_file(key = None, fname=None):
 
 
@@ -201,10 +203,18 @@ def download_file(key = None, fname=None):
         fpath = os.path.join(app.config['UPLOAD_FOLDER'], fname)
         return send_file(fpath)
     else:
-        return f"INVALID KEY: {key}", 403
+        #return f"INVALID KEY: {key}", 403
+        return render_template("login.html")
 
 
+@app.route("/files/download/public/<fname>/")
+def download_public_file(fname=None):
 
+    print("Downloading file...")
+
+    fname = secure_filename(fname)
+    fpath = os.path.join(app.config['PUBLIC_UPLOAD_FOLDER'], fname)
+    return send_file(fpath)
 
 
 
@@ -212,30 +222,32 @@ def download_file(key = None, fname=None):
 @app.post("/files/send")
 def send_files():
 
-    req = request
-
-    key = request.args.get('key', None)
+    key = request.args.get('key', "")
 
 
     with open(".secure/FILE_SEND_KEY") as f:
         file_send_key = f.read()
 
-    os.makedirs(app.config['UPLOAD_FOLDER'], exist_ok=True)
+    print("KEY:", key)
 
-    if key == file_send_key and key is not None:
+    if key == file_send_key and key != "":
         print(request.headers)
         fname = secure_filename(request.headers.get("fname", "upload.file"))
         if fname == "":
             fname="upload.file"
+
+        public = int(request.headers.get('public', False))
 
         total_bytes = int(request.headers.get('content-length'))
         bytes_left = int(request.headers.get('content-length'))
         chunk_size = 5120
 
 
+        target_folder = app.config['UPLOAD_FOLDER']
+        if public:
+            target_folder = app.config['PUBLIC_UPLOAD_FOLDER']
 
-
-        with open(os.path.join(app.config['UPLOAD_FOLDER'], fname), "wb") as f:
+        with open(os.path.join(target_folder, fname), "wb") as f:
             while bytes_left > 0:
                 chunk = request.stream.read(chunk_size)
                 f.write(chunk)
@@ -243,8 +255,10 @@ def send_files():
                 if not FETCH_SECRETS:
                     print(f"Uploading file... {(total_bytes-bytes_left)/total_bytes*100:3.0f}%", end="\r")
 
-
-        return f"\nFile uploaded! ({(total_bytes-bytes_left)/total_bytes*100:3.0f}% of {total_bytes/1000000:.2f} MB)\n", 200
+        download_link = f"{request.host_url}/files/download/{fname}"
+        if public:
+            download_link = f"{request.host_url}/files/download/public/{fname}"
+        return f"\n * [200] File uploaded! ({(total_bytes-bytes_left)/total_bytes*100:3.0f}% of {total_bytes/1000000:.2f} MB)\n * Download from: {download_link}\n", 200
 
     else:
-        return f"INVALID KEY: {key}", 403
+        return f" * INVALID KEY: {key}\n", 403
