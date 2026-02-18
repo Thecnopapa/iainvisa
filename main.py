@@ -45,6 +45,7 @@ with open(".secure/FLASK_KEY") as f:
     app.config["SECRET_KEY"] = f.read()
 
 app.config['UPLOAD_FOLDER'] = "uploads"
+os.makedirs(app.config['UPLOAD_FOLDER'], exist_ok=True)
 
 
 
