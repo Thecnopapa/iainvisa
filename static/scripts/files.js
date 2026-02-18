@@ -20,7 +20,6 @@ async function downloadFile(fname){
 	PAGE_IDLE = false;
 	let url = new URL(window.location.href);
 	let key = url.searchParams.get("key");
-	console.log(key);
 	window.open("/files/download/" + fname +"?key=" + key, '_blank').focus();
 	PAGE_IDLE = true;
 }
