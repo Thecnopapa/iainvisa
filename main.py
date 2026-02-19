@@ -218,11 +218,13 @@ def download_file(fname=None):
     key = request.args.get('key', None)
 
     if key == file_send_key and key is not None:
-        fname = secure_filename(fname)
-        fpath = os.path.join(app.config['UPLOAD_FOLDER'], fname)
-        return send_file(fpath)
+        try:
+            fname = secure_filename(fname)
+            fpath = os.path.join(app.config['UPLOAD_FOLDER'], fname)
+            return send_file(fpath)
+        except:
+            return "\n * [404] File not found ({fname})", 404
     else:
-        #return f"INVALID KEY: {key}", 403
         return render_template("login.html")
 
 
@@ -230,10 +232,12 @@ def download_file(fname=None):
 def download_public_file(fname=None):
 
     print("Downloading file...")
-
-    fname = secure_filename(fname)
-    fpath = os.path.join(app.config['PUBLIC_UPLOAD_FOLDER'], fname)
-    return send_file(fpath)
+    try:
+        fname = secure_filename(fname)
+        fpath = os.path.join(app.config['PUBLIC_UPLOAD_FOLDER'], fname)
+        return send_file(fpath)
+    except:
+        return "\n * [404] File not found ({fname})", 404
 
 
 @app.route("/storage/download/<fname>/")
@@ -248,25 +252,29 @@ def download_file_storage(fname=None):
     key = request.args.get('key', None)
 
     if key == file_send_key and key is not None:
-        fname = secure_filename(fname)
-        blob = db.blob(f"private/{fname}")
-        path = os.path.join(app.config['DOWNLOAD_FOLDER'], fname)
-        blob.download_to_file(open(path, "wb"))
-        return send_file(path, download_name=fname)
+        try:
+            fname = secure_filename(fname)
+            blob = db.blob(f"private/{fname}")
+            path = os.path.join(app.config['DOWNLOAD_FOLDER'], fname)
+            blob.download_to_file(open(path, "wb"))
+            return send_file(path, download_name=fname)
+        except:
+            return "\n * [404] File not found ({fname})", 404
     else:
-        #return f"INVALID KEY: {key}", 403
         return render_template("login.html")
 
 @app.route("/storage/download/public/<fname>/")
 def download_public_file_storage(fname=None):
 
     print("Downloading file...")
-
-    fname = secure_filename(fname)
-    blob = db.blob(f"public/{fname}")
-    path = os.path.join(app.config['DOWNLOAD_FOLDER'], fname)
-    blob.download_to_file(open(path, "wb"))
-    return send_file(path, download_name=fname)
+    try:
+        fname = secure_filename(fname)
+        blob = db.blob(f"public/{fname}")
+        path = os.path.join(app.config['DOWNLOAD_FOLDER'], fname)
+        blob.download_to_file(open(path, "wb"))
+        return send_file(path, download_name=fname)
+    except:
+        return "\n * [404] File not found ({fname})", 404
 
 @app.post("/storage/delete")
 def delete_file_storage():
