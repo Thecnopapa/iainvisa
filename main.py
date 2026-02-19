@@ -289,9 +289,9 @@ def delete_file_storage():
         else:
             blob = db.blob(f"private/{fname}")
         blob.delete()
-        return " * [200] File deleted!\n", 200
+        return "\n * [200] File deleted!\n", 200
     else:
-        return f" * [403] INVALID KEY: {key}\n", 403
+        return f"\n * [403] INVALID KEY: {key}\n", 403
 
 
 
@@ -318,9 +318,9 @@ def send_files():
 
         total_bytes = int(request.headers.get('content-length'))
         if total_bytes <= 0:
-            return " * [406] Empty file provided\n", 406
+            return "\n * [406] Empty file provided\n", 406
         elif total_bytes / 1000000 > 256:
-            return f" * [413] File too large (max 256 MB) provided: {total_bytes / 1000000:.2f} MB\n", 413
+            return f"\n * [413] File too large (max 256 MB) provided: {total_bytes / 1000000:.2f} MB\n", 413
         bytes_left = int(request.headers.get('content-length'))
         chunk_size = 5120
 
@@ -342,14 +342,17 @@ def send_files():
             return f"\n * [500] File upload incomplete! ({(total_bytes-bytes_left)/total_bytes*100:3.0f}% of {total_bytes/1000000:.2f} MB)\n", 500
 
         if store:
-
-            bucket = "private"
-            if public:
-                bucket = "public"
-            new_blob = db.blob(f"{bucket}/{fname}")
-            new_blob.upload_from_filename(path)
-            prefix="storage"
-            os.remove(path)
+            try:
+                bucket = "private"
+                if public:
+                    bucket = "public"
+                new_blob = db.blob(f"{bucket}/{fname}")
+                new_blob.upload_from_filename(path)
+                prefix="storage"
+                os.remove(path)
+            except:
+                os.remove(path)
+                return "\n * [504] Upload to cloud storage failed\n", 504
         else:
             prefix="files"
 
@@ -359,4 +362,4 @@ def send_files():
         return f"\n * [200] File uploaded! ({(total_bytes-bytes_left)/total_bytes*100:3.0f}% of {total_bytes/1000000:.2f} MB)\n * Download from: {download_link}\n", 200
 
     else:
-        return f" * [403] INVALID KEY: {key}\n", 403
+        return f"\n * [403] INVALID KEY: {key}\n", 403
