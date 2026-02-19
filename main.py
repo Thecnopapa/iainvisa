@@ -289,9 +289,9 @@ def delete_file_storage():
         else:
             blob = db.blob(f"private/{fname}")
         blob.delete()
-        return " * [200] File deleted!", 200
+        return " * [200] File deleted!\n", 200
     else:
-        return f" * [403] INVALID KEY: {key}", 403
+        return f" * [403] INVALID KEY: {key}\n", 403
 
 
 
@@ -318,9 +318,9 @@ def send_files():
 
         total_bytes = int(request.headers.get('content-length'))
         if total_bytes <= 0:
-            return " * [406] Empty file provided", 406
+            return " * [406] Empty file provided\n", 406
         elif total_bytes * 1000000 > 256:
-            return f" * [413] File too large (max 256 MB) provided: {total_bytes * 1000000:.2f} MB", 413
+            return f" * [413] File too large (max 256 MB) provided: {total_bytes * 1000000:.2f} MB\n", 413
         bytes_left = int(request.headers.get('content-length'))
         chunk_size = 5120
 
