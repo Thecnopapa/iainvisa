@@ -317,6 +317,10 @@ def send_files():
         store = int(request.headers.get('store', False))
 
         total_bytes = int(request.headers.get('content-length'))
+        if total_bytes <= 0:
+            return "Empty file provided", 406
+        elif total_bytes * 1000000 > 256:
+            return f"File too large (max 256 MB) provided: {total_bytes * 1000000:.2f} MB", 413
         bytes_left = int(request.headers.get('content-length'))
         chunk_size = 5120
 
