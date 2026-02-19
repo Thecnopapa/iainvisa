@@ -251,7 +251,7 @@ def download_file_storage(fname=None):
         fname = secure_filename(fname)
         blob = db.blob(f"private/{fname}")
         path = os.path.join(app.config['DOWNLOAD_FOLDER'], fname)
-        open(path, "wb").write(blob.download_as_bytes())
+        blob.download_to_file(open(path, "w"))
         return send_file(path, download_name=fname)
     else:
         #return f"INVALID KEY: {key}", 403
@@ -265,7 +265,7 @@ def download_public_file_storage(fname=None):
     fname = secure_filename(fname)
     blob = db.blob(f"public/{fname}")
     path = os.path.join(app.config['DOWNLOAD_FOLDER'], fname)
-    open(path, "wb").write(blob.download_as_bytes())
+    blob.download_to_file(open(path, "w"))
     return send_file(path, download_name=fname)
 
 @app.post("/storage/delete")
