@@ -223,7 +223,7 @@ def download_file(fname=None):
             fpath = os.path.join(app.config['UPLOAD_FOLDER'], fname)
             return send_file(fpath)
         except:
-            return "\n * [404] File not found ({fname})", 404
+            return f"\n * [404] File not found ({fname})", 404
     else:
         return render_template("login.html")
 
@@ -237,7 +237,7 @@ def download_public_file(fname=None):
         fpath = os.path.join(app.config['PUBLIC_UPLOAD_FOLDER'], fname)
         return send_file(fpath)
     except:
-        return "\n * [404] File not found ({fname})", 404
+        return f"\n * [404] File not found ({fname})", 404
 
 
 @app.route("/storage/download/<fname>/")
@@ -259,7 +259,7 @@ def download_file_storage(fname=None):
             blob.download_to_file(open(path, "wb"))
             return send_file(path, download_name=fname)
         except:
-            return "\n * [404] File not found ({fname})", 404
+            return f"\n * [404] File not found ({fname})", 404
     else:
         return render_template("login.html")
 
@@ -274,7 +274,7 @@ def download_public_file_storage(fname=None):
         blob.download_to_file(open(path, "wb"))
         return send_file(path, download_name=fname)
     except:
-        return "\n * [404] File not found ({fname})", 404
+        return f"\n * [404] File not found ({fname})", 404
 
 @app.post("/storage/delete")
 def delete_file_storage():
