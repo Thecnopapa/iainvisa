@@ -34,16 +34,23 @@ async function goToFile(fname, download=false, publicfile=false, storage_type="f
 		} else{
 			link.href = "/"+prefix+"/download/" + fname +"?key=" + key;
 		}
+		console.log(link.href);
 		link.download = fname;
 		link.click();
 
 	} else {
+		let u = undefined
 		if (publicfile){
-			window.open("/"+prefix+"/download/public/" + fname +"?key=" + key, '_blank').focus();
+			u = "/"+prefix+"/download/public/" + fname +"?key=" + key;
+			
 
 		} else {
-			window.open("/"+prefix+"/download/" + fname +"?key=" + key, '_blank').focus();
+			u = "/"+prefix+"/download/" + fname +"?key=" + key;
 		}
+		//u = window.location.protocol+window.location.host + u;
+		console.log(u);
+
+		window.open(u, '_blank').focus();
 	}
 
 	PAGE_IDLE = true;
@@ -62,6 +69,7 @@ async function deleteFile(fname, publicfile=false){
 			key:key,
 		})
 	}).then((response) => {
+		console.log(response);
 		window.location.reload();
 	})
 }
@@ -74,4 +82,4 @@ async function login(){
 }
 
 
-setTimeout(reloadPage, 10000);
+//setTimeout(reloadPage, 10000);

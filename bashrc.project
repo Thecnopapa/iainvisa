@@ -249,9 +249,11 @@ testing (){
 
 }
 deploy (){
+    gcloud config set project $PROJECT_NAME
 	cd $FOLDER_PATH && gcloud run deploy --source .
 }
 latest () {
+    gcloud config set project $PROJECT_NAME
     cd $FOLDER_PATH && gcloud run services update-traffic --to-latest
 }
 
