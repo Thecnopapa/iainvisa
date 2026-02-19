@@ -329,13 +329,17 @@ def send_files():
         if public:
             target_folder = app.config['PUBLIC_UPLOAD_FOLDER']
         path = os.path.join(target_folder, fname)
-        with open(path, "wb") as f:
-            while bytes_left > 0:
-                chunk = request.stream.read(chunk_size)
-                f.write(chunk)
-                bytes_left -= len(chunk)
-                if not FETCH_SECRETS:
-                    print(f"Uploading file... {(total_bytes-bytes_left)/total_bytes*100:3.0f}%", end="\r")
+        try:
+            with open(path, "wb") as f:
+                while bytes_left > 0:
+                    chunk = request.stream.read(chunk_size)
+                    f.write(chunk)
+                    bytes_left -= len(chunk)
+                    if not FETCH_SECRETS:
+                        print(f"Uploading file... {(total_bytes-bytes_left)/total_bytes*100:3.0f}%", end="\r")
+        except:
+            os.remove(path)
+            return f"\n * [500] File upload incomplete! ({(total_bytes-bytes_left)/total_bytes*100:3.0f}% of {total_bytes/1000000:.2f} MB)\n", 500
 
         if store:
 
