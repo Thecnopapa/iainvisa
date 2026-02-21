@@ -281,55 +281,13 @@ def upload_file():
 @app.route("/runs/", methods=["GET", "DELETE", "PUT"])
 def update_run():
 
-    print(request.__dict__)
-    print(request.form)
-    print(request.headers)
-    boundary = bytes(request.headers.get("Content-Type").split(";")[1].split("=")[1].strip(), encoding="utf-8")
-    print("BOUNDARY:", boundary)
-    total_bytes = int(request.headers.get('content-length'))
-    remaining_bytes = total_bytes
-    chunk_size = 4080
-    reading_header = True
-    header_stream = b""
-    while reading_header and remaining_bytes > 0:
-
-        header_stream += request.stream.read(chunk_size)
-        remaining_bytes -= chunk_size
-        print(header_stream)
-        if boundary in header_stream:
-            sections = header_stream.split(boundary)
-            for section in raw:
-                section_is_data=False
-                section_is_json=False
-                if section == b"--":
-                    continue
-                if "file=" in section:
-                    section_is_data=True
-
-                elif "json=" in section:
-                    if section.endswith(b"--"):
-                        sections.append(section)
-                        header_stream = header_stream[:len(header_stream) - len(section) - len(boundary)]
-                print(section[:50])
-
-        reading_header = False
-
-    data = request.data.split(boundary)
-    for d in data:
-        if len(d) < 1000:
-            print(">", d, len(d))
-            print(json.dumps(str(d), indent=4))
-        else:
-            print(">...", len(d))
-
-    #key = request.json.get("key", None)
-    return ""
+    key = request.headers.get("key", None)
 
     if key == os.environ["FILE_SEND_KEY"] and key is not None:
         try:
-            folder = secure_filename(request.json.get("folder", None))
-            fname = secure_filename(request.json.get("fname", None))
-            run = secure_filename(request.json.get("run", None))
+            folder = secure_filename(request.headers.get("folder", None))
+            fname = secure_filename(request.headers.get("fname", None))
+            run = secure_filename(request.headers.get("run", None))
             assert folder is not None
             assert fname is not None
             assert run is not None
@@ -368,12 +326,9 @@ def update_run():
             except:
                 os.remove(path)
                 return f"\n * [500] File upload incomplete! ({(total_bytes - bytes_left) / total_bytes * 100:3.0f}% of {total_bytes / 1000000:.2f} MB)\n", 500
-
+            return f"\n * [200] File uploaded! ({(total_bytes - bytes_left) / total_bytes * 100:3.0f}% of {total_bytes / 1000000:.2f} MB)\n", 200
         else:
             return f"\n * [503] METHOD NOT VALID: {request.method}\n", 503
-
-
-
 
     else:
         return f"\n * [403] INVALID KEY: {key}\n", 403
