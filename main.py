@@ -1,7 +1,7 @@
 import os, sys, json, subprocess
 
 import flask
-from flask import Flask, redirect, render_template, send_from_directory, request, send_file
+from flask import Flask, redirect, render_template, send_from_directory, request, send_file, session, make_response
 from utils import *
 from werkzeug.utils import secure_filename
 from google.cloud import storage
@@ -10,7 +10,7 @@ from google.cloud import storage
 
 
 
-FETCH_SECRETS = bool(int(os.environ.get("FETCH_SECRETS", 1)))
+FETCH_SECRETS = bool(int(os.environ.get("FETCH_SECRETS", 0)))
 
 if FETCH_SECRETS:
     from google.cloud import secretmanager
@@ -37,20 +37,45 @@ if FETCH_SECRETS:
         print(" * Failed to load secrets")
         raise
 
+
+if os.environ.get("FLASK_KEY", None) is None:
+    with open(".secure/FLASK_KEY") as f:
+        os.environ["FLASK_KEY"] = f.read()
+
+if os.environ.get("FILE_SEND_KEY", None) is None:
+    with open(".secure/FILE_SEND_KEY") as f:
+        os.environ["FILE_SEND_KEY"] = f.read()
+
+
 storage_client = storage.Client(project="iainvisa")
 db = storage_client.bucket("iv_fts")
+runs_db = storage_client.bucket("iv_tensorboard")
 
 
 app = Flask(__name__)
-with open(".secure/FLASK_KEY") as f:
-    app.config["SECRET_KEY"] = f.read()
 
-app.config['UPLOAD_FOLDER'] = "uploads"
-app.config['PUBLIC_UPLOAD_FOLDER'] = "public_uploads"
+app.config["SECRET_KEY"] = os.environ["FLASK_KEY"]
+
+
+if os.path.exists("/fts"):
+    app.config["UPLOAD_FOLDER"] = "/fts/private"
+    app.config['PUBLIC_UPLOAD_FOLDER'] = "/fts/public"
+
+else:
+    app.config['UPLOAD_FOLDER'] = "uploads"
+    app.config['PUBLIC_UPLOAD_FOLDER'] = "public_uploads"
+
+
+if os.path.exists("/runs"):
+    app.config["RUNS_FOLDER"] = "/runs"
+
+else:
+    app.config["RUNS_FOLDER"] = "runs"
+
 os.makedirs(app.config['UPLOAD_FOLDER'], exist_ok=True)
 os.makedirs(app.config['PUBLIC_UPLOAD_FOLDER'], exist_ok=True)
-app.config['DOWNLOAD_FOLDER'] = "downloads"
-os.makedirs(app.config['DOWNLOAD_FOLDER'], exist_ok=True)
+os.makedirs(app.config['RUNS_FOLDER'], exist_ok=True)
+
 
 
 
@@ -70,6 +95,10 @@ os.makedirs(app.config['DOWNLOAD_FOLDER'], exist_ok=True)
 
 
 @app.route("/")
+def menu():
+    return render_template("menu.html")
+
+
 @app.route("/cv")
 @app.route("/portfolio/")
 @app.route("/portfolio/academic")
@@ -175,129 +204,177 @@ def bioiain_docs(path=None):
     return mod.html()
 
 
+
+
+
+@app.post("/files/login")
+def fts_login():
+    key = request.json.get("key", None)
+
+    resp = make_response("Key saved")
+    resp.set_cookie("key", key)
+    return resp
+
+
+
 @app.route("/files/")
-def redirect_to_await():
-    return redirect("/files/await/")
-@app.route("/files/await/")
 def await_files():
 
-    key = request.args.get('key', None)
-    with open(".secure/FILE_SEND_KEY") as f:
-        file_send_key = f.read()
-    DB_TIMEOUT = False
-    public_files = {
-        "fast": os.listdir(app.config['PUBLIC_UPLOAD_FOLDER'])
-    }
-    try:
-        public_files["slow"] = [b.name.split("/")[-1] for b in db.list_blobs(prefix="public/", include_folders_as_prefixes=False) if not b.name.endswith("/")]
-    except:
-        DB_TIMEOUT=True
+    key = request.cookies.get("key", None)
 
-    if key == file_send_key and key is not None:
-        files = {
-            "fast": os.listdir(app.config['UPLOAD_FOLDER']),
-        }
-        try:
-            files["slow"] = [b.name.split("/")[-1] for b in db.list_blobs(prefix="private/", include_folders_as_prefixes=False) if not b.name.endswith("/")]
-        except:
-            DB_TIMEOUT = True
+    DB_TIMEOUT = False
+    public_files = os.listdir(app.config['PUBLIC_UPLOAD_FOLDER'])
+
+    if key == os.environ["FILE_SEND_KEY"] and key is not None:
+        files = os.listdir(app.config['UPLOAD_FOLDER'])
         return render_template("file_waiting.html", request=request, files=files, public_files=public_files, DB_TIMEOUT=DB_TIMEOUT)
     else:
         return render_template("file_waiting.html", request=request, files=None, public_files=public_files, DB_TIMEOUT=DB_TIMEOUT)
 
 
-@app.route("/files/download/<fname>/")
-def download_file(fname=None):
+@app.route("/files/<folder>/<fname>/", methods=["GET", "POST"])
+def download_file(fname, folder):
+    key = request.cookies.get("key", None)
+    fname = secure_filename(fname)
+    folder = secure_filename(folder)
 
-
-    with open(".secure/FILE_SEND_KEY") as f:
-        file_send_key = f.read()
-
-    print("Downloading file...")
-
-    key = request.args.get('key', None)
-
-    if key == file_send_key and key is not None:
-        try:
-            fname = secure_filename(fname)
-            fpath = os.path.join(app.config['UPLOAD_FOLDER'], fname)
-            return send_file(fpath)
-        except:
-            return f"\n * [404] File not found ({fname})", 404
-    else:
-        return render_template("login.html")
-
-
-@app.route("/files/download/public/<fname>/")
-def download_public_file(fname=None):
-
-    print("Downloading file...")
     try:
-        fname = secure_filename(fname)
-        fpath = os.path.join(app.config['PUBLIC_UPLOAD_FOLDER'], fname)
-        return send_file(fpath)
-    except:
-        return f"\n * [404] File not found ({fname})", 404
-
-
-@app.route("/storage/download/<fname>/")
-def download_file_storage(fname=None):
-
-
-    with open(".secure/FILE_SEND_KEY") as f:
-        file_send_key = f.read()
-
-    print("Downloading file...")
-
-    key = request.args.get('key', None)
-
-    if key == file_send_key and key is not None:
-        try:
-            fname = secure_filename(fname)
-            blob = db.blob(f"private/{fname}")
-            path = os.path.join(app.config['DOWNLOAD_FOLDER'], fname)
-            blob.download_to_file(open(path, "wb"))
-            return send_file(path, download_name=fname)
-        except:
-            return f"\n * [404] File not found ({fname})", 404
-    else:
-        return render_template("login.html")
-
-@app.route("/storage/download/public/<fname>/")
-def download_public_file_storage(fname=None):
-
-    print("Downloading file...")
-    try:
-        fname = secure_filename(fname)
-        blob = db.blob(f"public/{fname}")
-        path = os.path.join(app.config['DOWNLOAD_FOLDER'], fname)
-        blob.download_to_file(open(path, "wb"))
-        return send_file(path, download_name=fname)
-    except:
-        return f"\n * [404] File not found ({fname})", 404
-
-@app.post("/storage/delete")
-def delete_file_storage():
-
-
-    with open(".secure/FILE_SEND_KEY") as f:
-        file_send_key = f.read()
-
-    print("Deleting file...")
-
-    key = request.json.get('key', None)
-    public = request.json.get('public', False)
-    fname = secure_filename(request.json.get('fname', False))
-
-
-    if key == file_send_key and key is not None:
-        fname = secure_filename(fname)
-        if public:
-            blob = db.blob(f"public/{fname}")
+        if folder == "public":
+            return send_from_directory(app.config['PUBLIC_UPLOAD_FOLDER'], fname)
+        elif folder == "private":
+            if key == os.environ["FILE_SEND_KEY"] and key is not None:
+                return send_from_directory(app.config['UPLOAD_FOLDER'], fname)
+            else:
+                return render_template("login.html")
         else:
-            blob = db.blob(f"private/{fname}")
-        blob.delete()
-        return "\n * [200] File deleted!\n", 200
+            return f"\n * [404] Folder not found: {folder}\n", 404
+    except:
+        return f"\n * [404] File not found: {folder}/{fname}\n", 404
+
+
+
+@app.route("/files/", methods=["DELETE"])
+def delete_file():
+    key = request.cookies.get("key", None)
+    if key == os.environ["FILE_SEND_KEY"] and key is not None:
+        fname = secure_filename(request.json.get("fname", None))
+        folder = secure_filename(request.json.get("folder", None))
+        if folder == "public":
+            os.remove(os.path.join(app.config['PUBLIC_UPLOAD_FOLDER'], fname))
+        elif folder == "private":
+            os.remove(os.path.join(app.config['UPLOAD_FOLDER'], fname))
+
+        return "\n * [200] File deleted.\n", 200
+    else:
+        return f"\n * [403] INVALID KEY: {key}\n", 403
+
+
+@app.route("/files/", methods=["PUT"])
+def upload_file():
+    req = request.get_json()
+    file= req.get("file", None)
+    print(file)
+    print(req)
+    return "\n * [200] File deleted.\n", 200
+
+
+@app.route("/runs/", methods=["GET", "DELETE", "PUT"])
+def update_run():
+
+    print(request.__dict__)
+    print(request.form)
+    print(request.headers)
+    boundary = bytes(request.headers.get("Content-Type").split(";")[1].split("=")[1].strip(), encoding="utf-8")
+    print("BOUNDARY:", boundary)
+    total_bytes = int(request.headers.get('content-length'))
+    remaining_bytes = total_bytes
+    chunk_size = 4080
+    reading_header = True
+    header_stream = b""
+    while reading_header and remaining_bytes > 0:
+
+        header_stream += request.stream.read(chunk_size)
+        remaining_bytes -= chunk_size
+        print(header_stream)
+        if boundary in header_stream:
+            sections = header_stream.split(boundary)
+            for section in raw:
+                section_is_data=False
+                section_is_json=False
+                if section == b"--":
+                    continue
+                if "file=" in section:
+                    section_is_data=True
+
+                elif "json=" in section:
+                    if section.endswith(b"--"):
+                        sections.append(section)
+                        header_stream = header_stream[:len(header_stream) - len(section) - len(boundary)]
+                print(section[:50])
+
+        reading_header = False
+
+    data = request.data.split(boundary)
+    for d in data:
+        if len(d) < 1000:
+            print(">", d, len(d))
+            print(json.dumps(str(d), indent=4))
+        else:
+            print(">...", len(d))
+
+    #key = request.json.get("key", None)
+    return ""
+
+    if key == os.environ["FILE_SEND_KEY"] and key is not None:
+        try:
+            folder = secure_filename(request.json.get("folder", None))
+            fname = secure_filename(request.json.get("fname", None))
+            run = secure_filename(request.json.get("run", None))
+            assert folder is not None
+            assert fname is not None
+            assert run is not None
+        except:
+            return f"\n * [404] File not found\n", 404
+
+        if request.method == "GET":
+            print(request.__dict__)
+            return send_from_directory(app.config['RUNS_FOLDER'], folder, run, fname)
+        elif request.method == "DELETE":
+            try:
+                os.remove(os.path.join(app.config['RUNS_FOLDER'], folder, run, fname))
+                return f"\n * [200] File deleted.\n", 200
+            except:
+                return f"\n * [500] File not deleted: {folder}/{run}/{fname}\n", 404
+
+        elif request.method == "PUT":
+            total_bytes = int(request.headers.get('content-length'))
+            if total_bytes <= 0:
+                return "\n * [406] Empty file provided\n", 406
+            elif total_bytes / 1000000 > 256:
+                return f"\n * [413] File too large (max 256 MB) provided: {total_bytes / 1000000:.2f} MB\n", 413
+            bytes_left = int(request.headers.get('content-length'))
+            chunk_size = 5120
+
+            path = os.path.join(app.config['RUNS_FOLDER'], folder, run, fname)
+            os.makedirs(os.path.dirname(path), exist_ok=True)
+            try:
+                with open(path, "wb") as f:
+                    while bytes_left > 0:
+                        chunk = request.stream.read(chunk_size)
+                        f.write(chunk)
+                        bytes_left -= len(chunk)
+                        if not FETCH_SECRETS:
+                            print(f"Uploading file... {(total_bytes - bytes_left) / total_bytes * 100:3.0f}%", end="\r")
+            except:
+                os.remove(path)
+                return f"\n * [500] File upload incomplete! ({(total_bytes - bytes_left) / total_bytes * 100:3.0f}% of {total_bytes / 1000000:.2f} MB)\n", 500
+
+        else:
+            return f"\n * [503] METHOD NOT VALID: {request.method}\n", 503
+
+
+
+
     else:
         return f"\n * [403] INVALID KEY: {key}\n", 403
 
@@ -310,19 +387,17 @@ def send_files():
 
     key = request.args.get('key', "")
 
-    with open(".secure/FILE_SEND_KEY") as f:
-        file_send_key = f.read()
-
     print("KEY:", key)
+    if key == "":
+        key = None
 
-    if key == file_send_key and key != "":
+    if key == os.environ["FILE_SEND_KEY"] and key is not None:
         print(request.headers)
         fname = secure_filename(request.headers.get("fname", "upload.file"))
         if fname == "":
             fname="upload.file"
 
         public = int(request.headers.get('public', False))
-        store = int(request.headers.get('store', False))
 
         total_bytes = int(request.headers.get('content-length'))
         if total_bytes <= 0:
@@ -349,24 +424,10 @@ def send_files():
             os.remove(path)
             return f"\n * [500] File upload incomplete! ({(total_bytes-bytes_left)/total_bytes*100:3.0f}% of {total_bytes/1000000:.2f} MB)\n", 500
 
-        if store:
-            try:
-                bucket = "private"
-                if public:
-                    bucket = "public"
-                new_blob = db.blob(f"{bucket}/{fname}")
-                new_blob.upload_from_filename(path)
-                prefix="storage"
-                os.remove(path)
-            except:
-                os.remove(path)
-                return "\n * [504] Upload to cloud storage failed\n", 504
-        else:
-            prefix="files"
 
-        download_link = f"{request.host_url}/{prefix}/download/{fname}"
+        download_link = f"{request.host_url}files/private/{fname}"
         if public:
-            download_link = f"{request.host_url}/{prefix}/download/public/{fname}"
+            download_link = f"{request.host_url}files/public/{fname}"
         return f"\n * [200] File uploaded! ({(total_bytes-bytes_left)/total_bytes*100:3.0f}% of {total_bytes/1000000:.2f} MB)\n * Download from: {download_link}\n", 200
 
     else:
