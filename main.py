@@ -313,9 +313,12 @@ def update_run():
             bytes_left = int(request.headers.get('content-length'))
             chunk_size = 5120
 
-            path = os.path.join(app.config['RUNS_FOLDER'], folder, run, fname)
-            os.makedirs(os.path.dirname(path), exist_ok=True)
+            run_folder = os.path.join(app.config['RUNS_FOLDER'], folder, run)
+            os.makedirs(run_folder, exist_ok=True)
+            for old_file in os.listdir(run_folder):
+                os.remove(os.path.join(run_folder, old_file))
 
+            path = os.path.join(run_folder, fname)
             try:
                 if os.path.exists(path):
                     os.remove(path)
