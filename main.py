@@ -327,7 +327,7 @@ def update_run():
                         chunk = request.stream.read(chunk_size)
                         f.write(chunk)
                         bytes_left -= len(chunk)
-                        if not FETCH_SECRETS:
+                        if FETCH_SECRETS:
                             print(f"Uploading file... {(total_bytes - bytes_left) / total_bytes * 100:3.0f}%", end="\r")
             except:
                 os.remove(path)
@@ -379,7 +379,7 @@ def send_files():
                     chunk = request.stream.read(chunk_size)
                     f.write(chunk)
                     bytes_left -= len(chunk)
-                    if not FETCH_SECRETS:
+                    if FETCH_SECRETS:
                         print(f"Uploading file... {(total_bytes-bytes_left)/total_bytes*100:3.0f}%", end="\r")
         except:
             os.remove(path)
@@ -389,6 +389,7 @@ def send_files():
         download_link = f"{request.host_url}files/private/{fname}"
         if public:
             download_link = f"{request.host_url}files/public/{fname}"
+        print(f"File uploaded: {fname}")
         return f"\n * [200] File uploaded! ({(total_bytes-bytes_left)/total_bytes*100:3.0f}% of {total_bytes/1000000:.2f} MB)\n * Download from: {download_link}\n", 200
 
     else:
