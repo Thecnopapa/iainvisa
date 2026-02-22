@@ -315,7 +315,10 @@ def update_run():
 
             path = os.path.join(app.config['RUNS_FOLDER'], folder, run, fname)
             os.makedirs(os.path.dirname(path), exist_ok=True)
+
             try:
+                if os.path.exists(path):
+                    os.remove(path)
                 with open(path, "wb") as f:
                     while bytes_left > 0:
                         chunk = request.stream.read(chunk_size)
