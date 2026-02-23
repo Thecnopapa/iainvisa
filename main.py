@@ -109,6 +109,11 @@ def projectDimerPPT():
     return redirect("https://docs.google.com/presentation/d/1HGT1u9emPj-3RmbbPaktof1PfAYAaBjy0TO_0LxUf3E/edit?usp=sharing")
 
 
+@app.route("/vib.ai/ppt")
+def VIBAI_ppt():
+    return redirect("https://docs.google.com/presentation/d/1tm3k5Y9stZzwMRF_8jb7F_THODlhkeoU2XzhKNN82NU/edit?usp=sharing")
+
+
 
 @app.route("/Bio/<path:path>")
 def redirect_biopython(path):
@@ -121,8 +126,12 @@ def redirect_biopython(path):
 
 
 @app.route("/bioiain")
-@app.route("/bioiain/")
-@app.route("/bioiain/<path:path>")
+def bioiain_github():
+    return redirect("https://github.com/Thecnopapa/bioiain")
+
+    
+#@app.route("/bioiain/")
+#@app.route("/bioiain/<path:path>")
 def bioiain_docs(path=None):
     import pdoc
     import bioiain
