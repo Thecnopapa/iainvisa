@@ -72,9 +72,20 @@ if os.path.exists("/runs"):
 else:
     app.config["RUNS_FOLDER"] = "runs"
 
+if os.path.exists("/models"):
+    app.config["MODELS_FOLDER"] = "/models"
+
+else:
+    app.config["MODELS_FOLDER"] = "models"
+
+app.config['TEMP_UPLOAD_FOLDER'] = "/tmp/uploads"
+
 os.makedirs(app.config['UPLOAD_FOLDER'], exist_ok=True)
 os.makedirs(app.config['PUBLIC_UPLOAD_FOLDER'], exist_ok=True)
 os.makedirs(app.config['RUNS_FOLDER'], exist_ok=True)
+os.makedirs(app.config['MODELS_FOLDER'], exist_ok=True)
+os.makedirs(app.config['TEMP_UPLOAD_FOLDER'], exist_ok=True)
+
 
 
 
@@ -158,7 +169,7 @@ def redirect_biopython(path):
 def bioiain_github():
     return redirect("https://github.com/Thecnopapa/bioiain")
 
-    
+
 #@app.route("/bioiain/")
 #@app.route("/bioiain/<path:path>")
 def bioiain_docs(path=None):
@@ -250,11 +261,15 @@ def download_file(fname, folder):
     try:
         if folder == "public":
             return send_from_directory(app.config['PUBLIC_UPLOAD_FOLDER'], fname)
+        elif folder == "models":
+            return send_from_directory(app.config['MODEL_FOLDER'], fname)
         elif folder == "private":
             if key == os.environ["FILE_SEND_KEY"] and key is not None:
                 return send_from_directory(app.config['UPLOAD_FOLDER'], fname)
             else:
                 return render_template("login.html")
+        elif folder == "temp":
+            return send_from_directory(app.config['TEMP_UPLOAD_FOLDER'], fname)
         else:
             return f"\n * [404] Folder not found: {folder}\n", 404
     except:
@@ -272,6 +287,8 @@ def delete_file():
             os.remove(os.path.join(app.config['PUBLIC_UPLOAD_FOLDER'], fname))
         elif folder == "private":
             os.remove(os.path.join(app.config['UPLOAD_FOLDER'], fname))
+        elif folder == "models":
+            os.remove(os.path.join(app.config['MODEL_FOLDER'], fname))
 
         return "\n * [200] File deleted.\n", 200
     else:
@@ -284,7 +301,7 @@ def upload_file():
     file= req.get("file", None)
     print(file)
     print(req)
-    return "\n * [200] File deleted.\n", 200
+    return "\n * [200] File uploaded.\n", 200
 
 
 @app.route("/runs/", methods=["GET", "DELETE", "PUT"])
@@ -368,6 +385,7 @@ def send_files():
             fname="upload.file"
 
         public = int(request.headers.get('public', False))
+        model = int(request.headers.get('model', False))
 
         total_bytes = int(request.headers.get('content-length'))
         if total_bytes <= 0:
@@ -379,7 +397,9 @@ def send_files():
 
 
         target_folder = app.config['UPLOAD_FOLDER']
-        if public:
+        if model:
+            target_folder = app.config['MODELS_FOLDER']
+        elif public:
             target_folder = app.config['PUBLIC_UPLOAD_FOLDER']
         path = os.path.join(target_folder, fname)
         try:
@@ -396,10 +416,89 @@ def send_files():
 
 
         download_link = f"{request.host_url}files/private/{fname}"
-        if public:
+        if model:
+            download_link = f"{request.host_url}files/models/{fname}"
+        elif public:
             download_link = f"{request.host_url}files/public/{fname}"
+
         print(f"File uploaded: {fname}")
-        return f"\n * [200] File uploaded! ({(total_bytes-bytes_left)/total_bytes*100:3.0f}% of {total_bytes/1000000:.2f} MB)\n * Download from: {download_link}\n", 200
+        resp = make_response(f"\n * [200] File uploaded! ({(total_bytes-bytes_left)/total_bytes*100:3.0f}% of {total_bytes/1000000:.2f} MB)\n * Download from: {download_link}\n", 200)
+        print(resp.__dict__)
+        resp.headers["download_url"] = download_link
+        resp.status_code = 200
+        return resp
+
+
+
+    elif int(request.headers.get('temp', False)):
+        target_folder = app.config['TEMP_UPLOAD_FOLDER']
+        fname = request.headers.get("fname", None)
+        if fname is None:
+            return "\n * [406] No file name provided\n", 406
+        fname = secure_filename(fname)
+        total_bytes = int(request.headers.get('content-length'))
+        bytes_left = int(request.headers.get('content-length'))
+        chunk_size = 5120
+        if total_bytes <= 0:
+            return "\n * [406] Empty file provided\n", 406
+        elif total_bytes / 1000000 > 3:
+            return f"\n * [413] File too large (max 3 MB) provided: {total_bytes / 1000000:.2f} MB\n", 413
+
+
+
+        path = os.path.join(target_folder, fname)
+        try:
+            with open(path, "wb") as f:
+                while bytes_left > 0:
+                    chunk = request.stream.read(chunk_size)
+                    f.write(chunk)
+                    bytes_left -= len(chunk)
+                    if FETCH_SECRETS:
+                        print(f"Uploading file... {(total_bytes-bytes_left)/total_bytes*100:3.0f}%", end="\r")
+        except:
+            os.remove(path)
+            return f"\n * [500] File upload incomplete! ({(total_bytes-bytes_left)/total_bytes*100:3.0f}% of {total_bytes/1000000:.2f} MB)\n", 500
+
+
+        download_link = f"{request.host_url}files/temp/{fname}"
+
+        print(f"File uploaded: {fname}")
+        resp = make_response(f"\n * [200] File uploaded! ({(total_bytes-bytes_left)/total_bytes*100:3.0f}% of {total_bytes/1000000:.2f} MB)\n * Download from: {download_link}\n", 200)
+        print(resp.__dict__)
+        resp.headers["download_url"] = download_link
+        resp.status_code = 200
+        return resp
+
 
     else:
         return f"\n * [403] INVALID KEY: {key}\n", 403
+
+
+
+
+
+@app.route("/predict/", methods=["GET"])
+def predict_landing():
+
+    models = os.listdir(app.config['MODELS_FOLDER'])
+
+
+    return render_template("predict_landing.html", models=models)
+
+@app.route("/predict/<model>", methods=["GET"])
+def predict_setup(model=None):
+    model = secure_filename(model)
+
+    return render_template("predict.html", model=model)
+
+
+@app.route("/predict-test/", methods=["POST"])
+def test_preditc():
+    print(request.__dict__)
+    data = request.json
+    print("File", data.get("file", None))
+    print("Model", data.get("model", None))
+
+    return {"jobid": "1234"}, 200
+
+

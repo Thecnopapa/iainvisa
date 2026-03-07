@@ -1,0 +1,40 @@
+<html>
+
+	<head>
+        <link rel="icon" type="image/x-icon" href="/static/pics/blue_world_favicon.png">
+        <link href='/static/style/predict.css' as='style' rel='preload'>
+        <link href='/static/scripts/predict.js' as='script' rel='preload'>
+
+
+		<link href='/static/style/predict.css' rel='stylesheet'>
+        <script defer type="text/javascript" src="/static/scripts/predict.js"></script>
+        <title>Predict: Home</title>
+	</head>
+
+
+
+
+
+    <body>
+
+
+
+    <h1>Contactability Predict</h1>
+
+    <h2>Available models</h2>
+    <ul>
+        {% for model in models %}
+        <li><a href="/predict/{{ model }}">{{ model }}</a></li>
+        {% endfor %}
+    </ul>
+
+
+
+
+    </body>
+
+
+
+
+
+</html>

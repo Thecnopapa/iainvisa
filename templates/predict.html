@@ -1,0 +1,46 @@
+<html>
+
+	<head>
+        <link rel="icon" type="image/x-icon" href="/static/pics/blue_world_favicon.png">
+        <link href='/static/style/predict.css' as='style' rel='preload'>
+        <link href='/static/scripts/predict.js' as='script' rel='preload'>
+
+
+		<link href='/static/style/predict.css' rel='stylesheet'>
+        <script defer type="text/javascript" src="/static/scripts/predict.js"></script>
+        <title>Prediction: Submit</title>
+	</head>
+
+
+
+
+
+    <body>
+
+
+
+    <h1>Submit Prediction</h1>
+    <a href="/predict/">Back</a>
+    <h2>Selected model</h2>
+    <div id="model" name="{{ model }}"></div>
+    <p>Model path: {{ model }}</p>
+    <h3>Input file</h3>
+    <input type="file" accept=".cif" id="cif-file" onchange="this.nextElementSibling.value = this.files[0].name" />
+    <input type="text" placeholder="Input file name" id="cif-name">
+    <button onclick="submitPrediction()">Predict</button>
+    <br>
+    <br>
+    <br>
+
+
+
+
+
+
+    </body>
+
+
+
+
+
+</html>
