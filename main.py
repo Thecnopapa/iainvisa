@@ -382,7 +382,50 @@ def send_files():
     if key == "":
         key = None
 
-    if key == os.environ["FILE_SEND_KEY"] and key is not None:
+
+    if int(request.headers.get('temp', False)):
+        target_folder = app.config['TEMP_UPLOAD_FOLDER']
+        fname = request.headers.get("fname", None)
+        if fname is None:
+            return "\n * [406] No file name provided\n", 406
+        fname = secure_filename(fname)
+        total_bytes = int(request.headers.get('content-length'))
+        bytes_left = int(request.headers.get('content-length'))
+        chunk_size = 5120
+        if total_bytes <= 0:
+            return "\n * [406] Empty file provided\n", 406
+        elif total_bytes / 1000000 > 3:
+            return f"\n * [413] File too large (max 3 MB) provided: {total_bytes / 1000000:.2f} MB\n", 413
+
+
+
+        path = os.path.join(target_folder, fname)
+        try:
+            with open(path, "wb") as f:
+                while bytes_left > 0:
+                    chunk = request.stream.read(chunk_size)
+                    f.write(chunk)
+                    bytes_left -= len(chunk)
+                    if FETCH_SECRETS:
+                        print(f"Uploading file... {(total_bytes-bytes_left)/total_bytes*100:3.0f}%", end="\r")
+        except:
+            os.remove(path)
+            return f"\n * [500] File upload incomplete! ({(total_bytes-bytes_left)/total_bytes*100:3.0f}% of {total_bytes/1000000:.2f} MB)\n", 500
+
+
+        download_link = f"{request.host_url}files/temp/{fname}"
+
+        print(f"File uploaded: {fname}")
+        resp = make_response(f"\n * [200] File uploaded! ({(total_bytes-bytes_left)/total_bytes*100:3.0f}% of {total_bytes/1000000:.2f} MB)\n * Download from: {download_link}\n", 200)
+        print(resp.__dict__)
+        resp.headers["download_url"] = download_link
+        resp.headers["fname"] = fname
+
+        resp.status_code = 200
+        return resp
+
+
+    elif key == os.environ["FILE_SEND_KEY"] and key is not None:
         print(request.headers)
         fname = secure_filename(request.headers.get("fname", "upload.file"))
         if fname == "":
@@ -433,48 +476,6 @@ def send_files():
         resp.status_code = 200
         return resp
 
-
-
-    elif int(request.headers.get('temp', False)):
-        target_folder = app.config['TEMP_UPLOAD_FOLDER']
-        fname = request.headers.get("fname", None)
-        if fname is None:
-            return "\n * [406] No file name provided\n", 406
-        fname = secure_filename(fname)
-        total_bytes = int(request.headers.get('content-length'))
-        bytes_left = int(request.headers.get('content-length'))
-        chunk_size = 5120
-        if total_bytes <= 0:
-            return "\n * [406] Empty file provided\n", 406
-        elif total_bytes / 1000000 > 3:
-            return f"\n * [413] File too large (max 3 MB) provided: {total_bytes / 1000000:.2f} MB\n", 413
-
-
-
-        path = os.path.join(target_folder, fname)
-        try:
-            with open(path, "wb") as f:
-                while bytes_left > 0:
-                    chunk = request.stream.read(chunk_size)
-                    f.write(chunk)
-                    bytes_left -= len(chunk)
-                    if FETCH_SECRETS:
-                        print(f"Uploading file... {(total_bytes-bytes_left)/total_bytes*100:3.0f}%", end="\r")
-        except:
-            os.remove(path)
-            return f"\n * [500] File upload incomplete! ({(total_bytes-bytes_left)/total_bytes*100:3.0f}% of {total_bytes/1000000:.2f} MB)\n", 500
-
-
-        download_link = f"{request.host_url}files/temp/{fname}"
-
-        print(f"File uploaded: {fname}")
-        resp = make_response(f"\n * [200] File uploaded! ({(total_bytes-bytes_left)/total_bytes*100:3.0f}% of {total_bytes/1000000:.2f} MB)\n * Download from: {download_link}\n", 200)
-        print(resp.__dict__)
-        resp.headers["download_url"] = download_link
-        resp.headers["fname"] = fname
-
-        resp.status_code = 200
-        return resp
 
 
     else:
