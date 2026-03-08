@@ -1,24 +1,4 @@
 
-async function readBytes(file) {
-    console.log("Reading file... " + file.name);
-    let reader = new ArrayBuffer();
-    return reader.readAsArrayBuffer(file);
-
-    let filedata = undefined;
-    reader.onloadend = () => {
-        console.log("File reading done")
-        filedata = reader.result;
-    };
-    reader.onerror = () => {
-        console.error("Error reading the file. Please try again.");
-    };
-    await reader.Array(file);
-    while (!reader.result) {
-        console.log(reader.result);
-    }
-    return reader.result;
-}
-
 
 async function uploadCif(fileInput, nameInput){
     let file = fileInput.files[0];
@@ -33,15 +13,7 @@ async function uploadCif(fileInput, nameInput){
     }
     console.log(`Uploading ${file.name} as ${fname}...`);
 
-    // let filedata = readBytes(file);
-    // console.log(file);
-    // console.log(filedata);
-    // if (!filedata){
-    //     console.error("No file data:");
-    //     console.log(filedata)
-    //     return;
-    // }
-    // console.log("File read successfully.");
+
 
     let buffer = await file.arrayBuffer()
     console.log({buffer});
@@ -61,7 +33,7 @@ async function uploadCif(fileInput, nameInput){
     console.log(await resp.text());
 
     if (resp.ok) {
-        return resp.headers.get("download_url");
+        return resp.headers.get("fname");
     } else {
         console.error("upload failed");
         return undefined
@@ -70,20 +42,20 @@ async function uploadCif(fileInput, nameInput){
 
 async function submitPrediction(){
 
-    let uploadUrl = await uploadCif(document.getElementById("cif-file"), document.getElementById("cif-name"));
-    if (uploadUrl === undefined) {return;}
+    let fname = await uploadCif(document.getElementById("cif-file"), document.getElementById("cif-name"));
+    if (fname === undefined) {return;}
 
-    console.log("uploadUrl", uploadUrl);
+    console.log("fname", fname);
     let modelName = document.getElementById("model").attributes.name.value;
     console.log("modelName", modelName);
 
-    let resp = await fetch(`https://predict.iainvisa.com`, {
+    let resp = await fetch("https://predict-449194795494.europe-west1.run.app", {
         method: 'POST',
         headers: {
                 'Content-Type': 'application/json',
         },
         body: JSON.stringify({
-            "file": uploadUrl,
+            "fname":fname,
             "model": modelName,
         })
         }

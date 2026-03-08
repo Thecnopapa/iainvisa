@@ -78,7 +78,11 @@ if os.path.exists("/models"):
 else:
     app.config["MODELS_FOLDER"] = "models"
 
-app.config['TEMP_UPLOAD_FOLDER'] = "/tmp/uploads"
+if os.path.exists("/temp"):
+    app.config["TEMP_UPLOAD_FOLDER"] = "/temp"
+
+else:
+    app.config["TEMP_UPLOAD_FOLDER"] = "temp"
 
 os.makedirs(app.config['UPLOAD_FOLDER'], exist_ok=True)
 os.makedirs(app.config['PUBLIC_UPLOAD_FOLDER'], exist_ok=True)
@@ -425,6 +429,7 @@ def send_files():
         resp = make_response(f"\n * [200] File uploaded! ({(total_bytes-bytes_left)/total_bytes*100:3.0f}% of {total_bytes/1000000:.2f} MB)\n * Download from: {download_link}\n", 200)
         print(resp.__dict__)
         resp.headers["download_url"] = download_link
+        resp.headers["fname"] = fname
         resp.status_code = 200
         return resp
 
@@ -466,6 +471,8 @@ def send_files():
         resp = make_response(f"\n * [200] File uploaded! ({(total_bytes-bytes_left)/total_bytes*100:3.0f}% of {total_bytes/1000000:.2f} MB)\n * Download from: {download_link}\n", 200)
         print(resp.__dict__)
         resp.headers["download_url"] = download_link
+        resp.headers["fname"] = fname
+
         resp.status_code = 200
         return resp
 
@@ -491,14 +498,5 @@ def predict_setup(model=None):
 
     return render_template("predict.html", model=model)
 
-
-@app.route("/predict-test/", methods=["POST"])
-def test_preditc():
-    print(request.__dict__)
-    data = request.json
-    print("File", data.get("file", None))
-    print("Model", data.get("model", None))
-
-    return {"jobid": "1234"}, 200
 
 
