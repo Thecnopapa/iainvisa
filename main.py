@@ -561,14 +561,13 @@ def predict_submit():
 
     job_folder = f"/fts/predictions/{job_id}/in/"
     try:
-        os.makedirs(job_folder, exist_ok=True)
-
-        shutil.copy(f_path, job_folder)
-    except PermissionError:
-        job_id = "test_job"
-        job_folder = f"predictions/{job_id}/in/"
+        if os.path.exists(job_folder):
+            shutil.rmtree(job_folder)
         os.makedirs(job_folder, exist_ok=True)
         shutil.copy(f_path, job_folder)
+    except PermissionError as e:
+        print(e)
+        raise e
 
     job_info = {
         "job_id": job_id,
@@ -576,6 +575,7 @@ def predict_submit():
         "fname": fname,
         "chain": chain
     }
+    print("JOBINFO:", job_info)
     json.dump(job_info, open(os.path.join(job_folder, "job_info.json"), "w"))
 
     try:
