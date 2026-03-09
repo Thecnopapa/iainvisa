@@ -49,7 +49,7 @@ async function submitPrediction(){
     let modelName = document.getElementById("model").attributes.name.value;
     console.log("modelName", modelName);
 
-    let resp = await fetch("https://predict-449194795494.europe-west1.run.app", {
+    let resp = await fetch("https://iainvisa.com/predict/submit", {
         method: 'POST',
         headers: {
                 'Content-Type': 'application/json',
@@ -62,8 +62,10 @@ async function submitPrediction(){
     );
     if (resp.ok) {
         let jobInfo = await resp.json();
-        let jobId = jobInfo.jobid;
-        window.open(`/predict/job/${jobId}`, "_blank");
+        let jobId = jobInfo.job_id;
+        let jobUrl = jobInfo.job_url
+        console.log("Job submitted: "+ jobId);
+        window.open(jobUrl, "_blank");
     }
 
 }

@@ -1,4 +1,4 @@
-import os, sys, json, subprocess
+import os, sys, json, subprocess, requests, datetime, shutil
 
 import flask
 from flask import Flask, redirect, render_template, send_from_directory, request, send_file, session, make_response
@@ -33,6 +33,15 @@ if FETCH_SECRETS:
                 f.write(secret_client.access_secret_version(request={"name": "projects/449194795494/secrets/FILE_SEND_KEY/versions/latest"}).payload.data.decode("UTF-8"))
         except:
             print(" * Failed to read FILE_SEND_KEY")
+
+        try:
+            with open(".secure/job-exec.json", "w") as f:
+                f.write(secret_client.access_secret_version(
+                    request={"name": "projects/449194795494/secrets/job-exec/versions/latest"}).payload.data.decode(
+                    "UTF-8"))
+        except:
+            print(" * Failed to read job-exec")
+
     except:
         print(" * Failed to load secrets")
         raise
@@ -498,6 +507,74 @@ def predict_setup(model=None):
     model = secure_filename(model)
 
     return render_template("predict.html", model=model)
+
+
+
+
+
+
+@app.route("/predict/submit", methods=["POST", "GET", "PUT"])
+def predict_submit():
+    from google.cloud import run_v2
+    from google.oauth2.service_account import Credentials
+
+
+    data = request.json
+    try:
+        fname = secure_filename(data["fname"])
+        f_path = os.path.join(app.config['TEMP_UPLOAD_FOLDER'], fname)
+        model_name = secure_filename(data["model_name"])
+        chain = secure_filename(data.get("chain", "A"))
+    except:
+        return " * [406] Missing info", 406
+
+    job_id = datetime.datetime.now().strftime('%y-%m-%d_%H-%M-%S')
+
+
+    job_folder = f"/fts/predictions/{job_id}/in/"
+    os.makedirs(job_folder, exist_ok=True)
+
+    shutil.copy(f_path, job_folder)
+
+    job_info = {
+        "job_id": job_id,
+        "model_name": model_name,
+        "fname": fname,
+        "chain": chain
+    }
+    json.dump(job_info, open(os.path.join(job_folder, "job_info.json"), "w"))
+
+    try:
+        client = run_v2.JobsClient(credentials=Credentials.from_service_account_file(".secure/job-exec.json"))
+
+        req = run_v2.RunJobRequest(
+            name=f"projects/iainvisa/locations/europe-west1/jobs/predictrun",
+            overrides={
+                "container_overrides":
+                    [
+                        {"env": [{"name": "JOBID", "value": "4444"}]}
+                    ]
+            }
+        )
+        client.run_job(request=req)
+    except:
+        return f"\n * [504] Job submission error\n", 504
+
+    if request.method == "PUT":
+        return f"\n * [200] Job ({job_id}) submitted successfully\n * Await results at: https://iainvisa.com/predict/jobs/{job_id}\n", 200
+
+    elif request.method == "POST":
+        resp = make_response({
+            "job_id": job_id,
+            "job_url": "https://iainvisa.com/predict/jobs/{job_id}"
+        })
+        return resp, 200
+
+    elif request.method == "GET":
+        return redirect(f"https://iainvisa.com/predict/jobs/{job_id}\n")
+
+
+
 
 
 

@@ -19,6 +19,8 @@ werkzeug
 #GOOGLE
 google-cloud-storage
 google-cloud-secret-manager
+google-cloud-run
+
 firebase-admin
 
 
