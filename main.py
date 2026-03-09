@@ -582,8 +582,10 @@ def predict_submit():
             }
         )
         client.run_job(request=req)
-    except:
-        return f"\n * [504] Job submission error\n", 504
+    except Exception as e:
+        print(job_info)
+        print(e)
+        return f"\n * [504] Job submission error\ne\n", 504
 
     if request.method == "PUT":
         return f"\n * [200] Job ({job_id}) submitted successfully\n * Await results at: https://iainvisa.com/predict/jobs/{job_id}\n", 200
