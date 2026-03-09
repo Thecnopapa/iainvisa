@@ -11,6 +11,7 @@ from google.cloud import storage
 
 
 FETCH_SECRETS = bool(int(os.environ.get("FETCH_SECRETS", 0)))
+os.makedirs(".secure", exist_ok=True)
 
 if FETCH_SECRETS:
     from google.cloud import secretmanager
@@ -56,7 +57,7 @@ if os.environ.get("FILE_SEND_KEY", None) is None:
         os.environ["FILE_SEND_KEY"] = f.read()
 
 if os.environ.get("JOB_EXEC", None) is not None:
-    with open(".secure/job-exec.json") as f:
+    with open(".secure/job-exec.json", "w") as f:
         f.write(os.environ["JOB_EXEC"])
 
 os.environ["JOB_EXEC"] =".secure/job-exec.json"
