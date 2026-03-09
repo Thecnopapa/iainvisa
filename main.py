@@ -55,6 +55,14 @@ if os.environ.get("FILE_SEND_KEY", None) is None:
     with open(".secure/FILE_SEND_KEY") as f:
         os.environ["FILE_SEND_KEY"] = f.read()
 
+if os.environ.get("JOB_EXEC", None) is not None:
+    with open(".secure/job-exec.json") as f:
+        f.write(os.environ["JOB_EXEC"])
+
+os.environ["JOB_EXEC"] =".secure/job-exec.json"
+
+
+
 
 storage_client = storage.Client(project="iainvisa")
 db = storage_client.bucket("iv_fts")
@@ -570,7 +578,7 @@ def predict_submit():
     json.dump(job_info, open(os.path.join(job_folder, "job_info.json"), "w"))
 
     try:
-        client = run_v2.JobsClient(credentials=Credentials.from_service_account_file(".secure/job-exec.json"))
+        client = run_v2.JobsClient(credentials=Credentials.from_service_account_file(os.environ["JOB_EXEC"]))
 
         req = run_v2.RunJobRequest(
             name=f"projects/iainvisa/locations/europe-west1/jobs/predictrun",
