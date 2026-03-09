@@ -551,9 +551,15 @@ def predict_submit():
 
 
     job_folder = f"/fts/predictions/{job_id}/in/"
-    os.makedirs(job_folder, exist_ok=True)
+    try:
+        os.makedirs(job_folder, exist_ok=True)
 
-    shutil.copy(f_path, job_folder)
+        shutil.copy(f_path, job_folder)
+    except PermissionError:
+        job_id = "test_job"
+        job_folder = f"predictions/{job_id}/in/"
+        os.makedirs(job_folder, exist_ok=True)
+        shutil.copy(f_path, job_folder)
 
     job_info = {
         "job_id": job_id,
@@ -571,7 +577,7 @@ def predict_submit():
             overrides={
                 "container_overrides":
                     [
-                        {"env": [{"name": "JOBID", "value": "4444"}]}
+                        {"env": [{"name": "JOBID", "value": f"{job_id}"}],}
                     ]
             }
         )

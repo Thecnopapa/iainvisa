@@ -63,9 +63,9 @@ async function submitPrediction(){
     if (resp.ok) {
         let jobInfo = await resp.json();
         let jobId = jobInfo.job_id;
-        let jobUrl = jobInfo.job_url
+        let jobUrl = jobInfo.job_url;
         console.log("Job submitted: "+ jobId);
-        window.open(jobUrl, "_blank");
+        window.open("/predict/job/"+jobId, "_blank");
     }
 
 }
