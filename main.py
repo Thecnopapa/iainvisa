@@ -508,6 +508,25 @@ def predict_setup(model=None):
 
     return render_template("predict.html", model=model)
 
+@app.route("/predict/job/<jobid>", methods=["GET"])
+def predict_result(jobid=None):
+    jobid = secure_filename(jobid)
+
+    in_info_file = f"/fts/predictions/in/{jobid}/job_info.json"
+    out_info_file = f"/fts/predictions/out/{jobid}/job_info.json"
+
+    try:
+        in_info = json.load(open(in_info_file))
+    except FileNotFoundError:
+        return f"\n * [406] Job not found", 406
+
+    try:
+        out_info = json.load(open(out_info_file))
+    except FileNotFoundError:
+        out_info = {"status": "pending"}
+
+    return render_template("prediction_result.html", jobid=jobid, in_info=in_info, out_info=out_info)
+
 
 
 
@@ -572,6 +591,9 @@ def predict_submit():
 
     elif request.method == "GET":
         return redirect(f"https://iainvisa.com/predict/jobs/{job_id}\n")
+
+    else:
+        return "Not implemented", 404
 
 
 

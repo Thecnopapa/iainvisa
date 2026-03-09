@@ -49,14 +49,14 @@ async function submitPrediction(){
     let modelName = document.getElementById("model").attributes.name.value;
     console.log("modelName", modelName);
 
-    let resp = await fetch("https://iainvisa.com/predict/submit", {
+    let resp = await fetch("/predict/submit", {
         method: 'POST',
         headers: {
                 'Content-Type': 'application/json',
         },
         body: JSON.stringify({
             "fname":fname,
-            "model": modelName,
+            "model_name": modelName,
         })
         }
     );

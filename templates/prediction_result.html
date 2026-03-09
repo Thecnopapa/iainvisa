@@ -17,7 +17,17 @@
 
     <body>
 
-    <iframe src="https://molstar.org/me/viewer/" height="50%" width="90%" title="Mesoscale Explorer"></iframe>
+    <h1>Prediction: Result</h1>
+    <a href="/predict/">Back</a>
 
+    <h2>JOBID: {{ jobid }}</h2>
+    <h3>STATUS: {{ out_info["status"] }}      <a href="/predict/job/{{ jobid }}">Refresh</a></h3>
+    {% if status == "ok" %}
+        <iframe class="hidden" style="display: none" id="viewer" src="https://molstar.org/me/viewer/" height="50%" width="90%" title="Contactability Prediction"></iframe>
+    {% elif out_info["status"] == "failed" %}
+
+    {% elif out_info["status"] == "pending" %}
+
+    {% elif out_info["status"] == "running" %}
     </body>
 </html>
