@@ -96,8 +96,8 @@ if os.path.exists("/models"):
 else:
     app.config["MODELS_FOLDER"] = "models"
 
-if os.path.exists("/temp"):
-    app.config["TEMP_UPLOAD_FOLDER"] = "/temp"
+if os.path.exists("/fts/temp"):
+    app.config["TEMP_UPLOAD_FOLDER"] = "/fts/temp"
 
 else:
     app.config["TEMP_UPLOAD_FOLDER"] = "temp"
