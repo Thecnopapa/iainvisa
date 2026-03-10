@@ -565,11 +565,11 @@ def predict_submit():
             shutil.rmtree(job_folder)
         os.makedirs(job_folder, exist_ok=True)
         os.makedirs(".tmp", exist_ok=True)
-        tmp = shutil.copy(f_path, ".tmp")
-        shutil.copy(tmp, job_folder)
+        #tmp = shutil.copy(f_path, ".tmp")
+        shutil.copy(f_path, job_folder)
     except PermissionError as e:
         print(e)
-        raise e
+
 
     job_info = {
         "job_id": job_id,
