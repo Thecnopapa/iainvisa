@@ -17,7 +17,7 @@
 
     <body>
     {% if out_info["status"] == "ok" %}
-    <div class="molestar-viewer" style="height: 100vh; width: 100%; position: absolute; top:0; left:0;">{{ viewer |safe }}</div>
+    <div class="molestar-viewer" style="height: 80vh; width: 100%; position: absolute; top:0; left:0; overflow: hidden">{{ viewer |safe }}</div>
     {% endif %}
 
 
@@ -27,8 +27,9 @@
     <h2>JOBID: {{ jobid }}</h2>
     <h3>STATUS: {{ out_info["status"] }}      <a href="/predict/job/{{ jobid }}">Refresh</a></h3>
     {% if out_info["status"] == "ok" %}
-        <a href="{{ folder_url }}">Download Data</a>
-        <a href="{{ prediction_url }}">Downlad Prediction</a>
+        <a href="{{ info_url }}">Download Job Info (.json)</a>
+        <a href="{{ prediction_url }}">Download Prediction (.cif)</a>
+        <p>Links will expire after 7 days</p>
 
 
     {% elif out_info["status"] == "failed" %}

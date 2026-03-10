@@ -566,7 +566,7 @@ def predict_result(jobid=None):
                 version="v4",
                 expiration=datetime.timedelta(days=7),
                 method="GET",
-                response_disposition=f"attachment; filename=job_info_{jobid}.json}",
+                response_disposition=f"attachment; filename=job_info_{jobid}.json",
             )
         except Exception as e:
             print(e)
