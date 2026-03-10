@@ -533,8 +533,8 @@ def predict_result(jobid=None):
 
     jobid = secure_filename(jobid)
 
-    in_info_file = f"/fts/predictions/{jobid}/in/job_info.json"
-    out_info_file = f"/fts/predictions/{jobid}/out/job_info.json"
+    in_info_file = os.path.join(os.environ["PREDICT_FOLDER"], f"{jobid}/in/job_info.json")
+    out_info_file = os.path.join(os.environ["PREDICT_FOLDER"], f"{jobid}/out/job_info.json")
     prediction_url = ""
     folder_url=""
     viewer = ""
@@ -567,7 +567,7 @@ def predict_result(jobid=None):
             method="GET",
         )
 
-        viewer = molstar_viewer(prediction_url, save_folder=f"/predictions/{jobid}/out")
+        viewer = molstar_viewer(prediction_url, save_folder=os.path.join(os.environ["PREDICT_FOLDER"], f"{jobid}/out"))
 
 
     return render_template("prediction_result.html", jobid=jobid, in_info=in_info, out_info=out_info,
@@ -623,7 +623,7 @@ def predict_submit():
     job_id = datetime.datetime.now().strftime('%y-%m-%d_%H-%M-%S')
 
 
-    job_folder = f"/fts/predictions/{job_id}/in/"
+    job_folder = os.path.join(os.environ["PREDICT_FOLDER"], f"{job_id}/in/")
     try:
         if os.path.exists(job_folder):
             shutil.rmtree(job_folder)
