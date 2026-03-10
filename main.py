@@ -564,7 +564,9 @@ def predict_submit():
         if os.path.exists(job_folder):
             shutil.rmtree(job_folder)
         os.makedirs(job_folder, exist_ok=True)
-        shutil.copy(f_path, job_folder)
+        os.makedirs(".tmp", exist_ok=True)
+        tmp = shutil.copy(f_path, ".tmp")
+        shutil.copy(tmp, job_folder)
     except PermissionError as e:
         print(e)
         raise e
