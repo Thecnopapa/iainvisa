@@ -26,7 +26,7 @@
         <a href="{{ folder_url }}">Download Data</a>
         <a href="{{ prediction_url }}">Downlad Prediction</a>
 
-        <div class="molestar-viewer" style="height: 100%; width: 100%">{{ viewer }}</div>
+        <div class="molestar-viewer" style="height: 100%; width: 100%">{{ viewer |safe }}</div>
 
     {% elif out_info["status"] == "failed" %}
 
