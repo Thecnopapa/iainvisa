@@ -562,7 +562,9 @@ def predict_result(jobid=None):
      prediction_url=prediction_url, folder_url=folder_url)
 
 
-
+@app.route("/molstar")
+def molstar_test():
+    return render_template("molstar_test.html")
 
 
 
