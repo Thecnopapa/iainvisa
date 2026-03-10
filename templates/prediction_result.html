@@ -32,7 +32,8 @@
 
 
     {% elif out_info["status"] == "failed" %}
-        <h4>Job failed xd</h4>
+        <h4>Job failed, see error:</h4>
+        <p>out_info["status"]</p>
 
     {% elif out_info["status"] == "pending" %}
         <h4>Job pending (shoudn't take more than 3 minutes)</h4>

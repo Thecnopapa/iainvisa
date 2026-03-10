@@ -536,8 +536,8 @@ def predict_result(jobid=None):
     in_info_file = os.path.join(app.config["PREDICT_FOLDER"], f"{jobid}/in/job_info.json")
     out_info_file = os.path.join(app.config["PREDICT_FOLDER"], f"{jobid}/out/job_info.json")
     prediction_url = ""
-    folder_url=""
-    viewer = ""
+    info_url=""
+    viewer = "<h3>Viewer failed</h3>"
     try:
         in_info = json.load(open(in_info_file))
     except FileNotFoundError:
@@ -553,25 +553,31 @@ def predict_result(jobid=None):
         if pred_path_db.startswith("/"):
             pred_path_db = pred_path_db[1:]
         pred_blob = db.blob(pred_path_db)
-        prediction_url = pred_blob.generate_signed_url(
-            version="v4",
-            expiration=datetime.timedelta(days=7),
-            method="GET",
-            response_disposition=f"attachment; filename={pred_fname}",
-        )
+        try:
+            prediction_url = pred_blob.generate_signed_url(
+                version="v4",
+                expiration=datetime.timedelta(days=7),
+                method="GET",
+                response_disposition=f"attachment; filename={pred_fname}",
+            )
 
-        out_blob = db.blob(f"predictions/{jobid}")
-        folder_url = out_blob.generate_signed_url(
-            version="v4",
-            expiration=datetime.timedelta(days=7),
-            method="GET",
-        )
+            out_blob = db.blob(f"predictions/{jobid}/out/job_info.json")
+            info_url = out_blob.generate_signed_url(
+                version="v4",
+                expiration=datetime.timedelta(days=7),
+                method="GET",
+                response_disposition=f"attachment; filename=job_info_{jobid}.json}",
+            )
+        except Exception as e:
+            print(e)
 
-        viewer = molstar_viewer(prediction_url, save_folder=os.path.join(app.config["PREDICT_FOLDER"], f"{jobid}/out"))
-
+        try:
+            viewer = molstar_viewer(prediction_url, save_folder=os.path.join(app.config["PREDICT_FOLDER"], f"{jobid}/out"))
+        except Exception as e:
+            print(e)
 
     return render_template("prediction_result.html", jobid=jobid, in_info=in_info, out_info=out_info,
-     prediction_url=prediction_url, folder_url=folder_url, viewer=viewer)
+     prediction_url=prediction_url, info_url=info_url, viewer=viewer)
 
 
 def molstar_viewer(url, save_folder=None):
