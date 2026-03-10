@@ -521,8 +521,8 @@ def predict_setup(model=None):
 def predict_result(jobid=None):
     jobid = secure_filename(jobid)
 
-    in_info_file = f"/fts/predictions/in/{jobid}/job_info.json"
-    out_info_file = f"/fts/predictions/out/{jobid}/job_info.json"
+    in_info_file = f"/fts/predictions/{jobid}/in/job_info.json"
+    out_info_file = f"/fts/predictions/{jobid}/out/job_info.json"
 
     try:
         in_info = json.load(open(in_info_file))
