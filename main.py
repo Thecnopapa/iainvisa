@@ -540,13 +540,13 @@ def predict_result(jobid=None):
         if pred_path_db.startswith("/"):
             pred_path_db = pred_path_db[1:]
         pred_blob = db.blob(pred_path_db)
-            prediction_url = blob.generate_signed_url(
+        prediction_url = blob.generate_signed_url(
             version="v4",
             expiration=datetime.timedelta(days=7),
             method="GET",
         )
         out_blob = db.blob(f"predictions/{jobid}")
-            folder_url = blob.generate_signed_url(
+        folder_url = blob.generate_signed_url(
             version="v4",
             expiration=datetime.timedelta(days=7),
             method="GET",
