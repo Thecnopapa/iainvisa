@@ -1,0 +1,104 @@
+<html>
+
+	<head>
+        <link rel="icon" type="image/x-icon" href="/pics/blue_world_favicon.png">
+        <link href='/static/style/predict.css' as='style' rel='preload'>
+        <link href='/static/scripts/predict.js' as='script' rel='preload'>
+
+
+		<link href='/static/style/predict.css' rel='stylesheet'>
+        <script defer type="text/javascript" src="/static/scripts/predict.js"></script>
+
+        <script defer src="https://molstar.org/me/viewer/molstar.js"></script>
+        <title>Prediction: Result</title>
+	</head>
+
+
+
+
+    <body>
+
+        <button onclick="loadURL('https://storage.googleapis.com/iv_fts/predictions/26-03-10_10-40-49/out/1M2Z_26-03-10_10-40-49/1M2Z_26-03-10_10-40-49_predicted_monomer_contacts.cif?X-Goog-Algorithm=GOOG4-RSA-SHA256&X-Goog-Credential=job-exec%40iainvisa.iam.gserviceaccount.com%2F20260310%2Fauto%2Fstorage%2Fgoog4_request&X-Goog-Date=20260310T114650Z&X-Goog-Expires=604800&X-Goog-SignedHeaders=host&X-Goog-Signature=110bfb40beb6e3c943b9cd64675dd6a2d529ef921d3591733cbd0fb030f5c1b2ed94a0191d31305ac4cf4cea4142d9b4180ead316c83c4e48676d6230584e4668859a30500dd4cf79e1956d86388c25969f8825714fa8ad9ec1d02d70851b683c1833daff2cdb1a0954db94ed81115857f366de077e1e70d016fb620304f71bc7eef13d8c4c4627c96031d205784a2baae61dc7c3952503f5e66fcafdd99bfd7903d3ef95c77ce2fe7abbbf1ea8f7452ecdfe188158a529bb901f26a1b2e49d29f5d83a00a67c0a708acf29eeca905df469ff4148707a42b4d4f4da0f3e401855364e973a494f052a521462bf25f6dfedcb0aef486406b5769ca22192c2ad8d6')">Change</button>
+        <button onclick="loadURL('https://files.rcsb.org/download/1M2Z.cif')">RSCB</button>
+            <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        html, body {
+            width: 100%;
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: flex-start;
+            overflow: hidden;
+        }
+        #controls {
+            display: flex;
+            justify-content: center;
+            width: 800px;
+            margin-bottom: 10px;
+            z-index: 1;
+        }
+        button {
+            margin: 5px;
+            padding: 10px 20px;
+            font-size: 14px;
+            cursor: pointer;
+        }
+        #viewer-container {
+            width: 100%;
+            height: 600px;
+            border: 1px solid #ccc;
+            position: relative;
+        }
+    </style>
+    <link rel="stylesheet" type="text/css" href="https://molstar.org/me/viewer/molstar.css" />
+</head>
+<body>
+    <div id="controls">
+        <button onclick="loadExample('cellpack-hiv1')">Load HIV-1 Example</button>
+        <button onclick="loadExample('machineryoflife-tour')">Load Machinery of Life Tour</button>
+        <button onclick="loadExample('petworld-synvesicle')">Load Synaptic Vesicle Example</button>
+    </div>
+    <div id="viewer-container">
+        <div id="meso-viewer" style="position: relative; width: 100%; height: 400px;"></div>
+    </div>
+
+    <script src="https://molstar.org/me/viewer/molstar.js"></script>
+    <script type="text/javascript">
+        let mesoExplorer;
+
+        function loadExample(example) {
+            if (mesoExplorer) {
+                mesoExplorer.loadExample(example);
+
+            }
+        }
+        function loadURL(url) {
+            if (mesoExplorer) {
+                mesoExplorer.loadUrl(url);
+
+            }
+        }
+
+        molstar.MesoscaleExplorer.create('meso-viewer', {
+            layoutShowControls: false,
+            viewportShowExpand: false,
+            layoutIsExpanded: false,
+            powerPreference: 'high-performance',
+            graphicsMode: 'quality'
+        }).then(me => {
+            mesoExplorer = me;
+            me.loadExample('cellpack-hiv1');  // Load the default example on page load
+
+            window.addEventListener('unload', () => {
+                me.dispose();
+            });
+        });
+    </script>
+
+    </body>
+</html>

@@ -542,6 +542,7 @@ def predict_result(jobid=None):
         out_info = {"status": "pending"}
     if out_info["status"] == "ok":
         pred_path_db = out_info["prediction"]
+        pred_fname = os.path.basename(out_info["prediction"])
         if pred_path_db.startswith("/"):
             pred_path_db = pred_path_db[1:]
         pred_blob = db.blob(pred_path_db)
@@ -549,6 +550,11 @@ def predict_result(jobid=None):
             version="v4",
             expiration=datetime.timedelta(days=7),
             method="GET",
+            response_disposition=f"attachment; filename={pred_fname}",
+            headers={
+                "Content-Type": "chemical/x-cif"
+            }
+
         )
         out_blob = db.blob(f"predictions/{jobid}")
         folder_url = out_blob.generate_signed_url(
