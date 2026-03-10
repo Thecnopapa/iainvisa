@@ -22,7 +22,7 @@
 
     <h2>JOBID: {{ jobid }}</h2>
     <h3>STATUS: {{ out_info["status"] }}      <a href="/predict/job/{{ jobid }}">Refresh</a></h3>
-    {% if status == "ok" %}
+    {% if out_info["status"] == "ok" %}
         <a href="{{ folder_url }}">Download Data</a>
         <a href="{{ prediction_url }}">Downlad Prediction</a>
         <iframe class="hidden" style="display: none" id="viewer" src="https://molstar.org/me/viewer/?url={{prediction_url}}&type=cif" height="60%" width="100%" title="Contactability Prediction"></iframe>
