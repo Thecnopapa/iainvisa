@@ -16,6 +16,10 @@
 
 
     <body>
+    {% if out_info["status"] == "ok" %}
+    <div class="molestar-viewer" style="height: 100vh; width: 100%; position: absolute; top:0; left:0;">{{ viewer |safe }}</div>
+    {% endif %}
+
 
     <h1>Prediction: Result</h1>
     <a href="/predict/">Back</a>
@@ -26,13 +30,15 @@
         <a href="{{ folder_url }}">Download Data</a>
         <a href="{{ prediction_url }}">Downlad Prediction</a>
 
-        <div class="molestar-viewer" style="height: 100%; width: 80vh">{{ viewer |safe }}</div>
 
     {% elif out_info["status"] == "failed" %}
+        <h4>Job failed xd</h4>
 
     {% elif out_info["status"] == "pending" %}
+        <h4>Job pending (shoudn't take more than 3 minutes)</h4>
 
     {% elif out_info["status"] == "running" %}
+        <h4>Job running (aprox 10-15 minutes, depending on size)</h4>
 
     {% endif %}
     </body>
