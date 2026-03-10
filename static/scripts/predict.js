@@ -70,3 +70,28 @@ async function submitPrediction(){
 
 }
 
+// Setup to load data from rawgit
+NGL.DatasourceRegistry.add(
+    "data", new NGL.StaticDatasource( "http://files.rcsb.org/download/" ),
+    "cloud", new NGL.StaticDatasource( "https://storage.googleapis.com/iv_fts/" ), 
+);
+
+// Create NGL Stage object
+var stage = new NGL.Stage( "viewport" );
+
+// Handle window resizing
+window.addEventListener( "resize", function( event ){
+    stage.handleResize();
+}, false );
+
+
+// Code for example: color/atomindex
+
+
+stage.loadFile( "data://1m2z.cif" ).then( function( comp ){
+    comp.addRepresentation( "cartoon", { multipleBond: true, color: "bfactor"} );
+} );
+
+
+
+

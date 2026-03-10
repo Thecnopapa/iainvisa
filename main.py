@@ -59,7 +59,7 @@ if os.environ.get("FILE_SEND_KEY", None) is None:
     with open(".secure/FILE_SEND_KEY") as f:
         os.environ["FILE_SEND_KEY"] = f.read()
 
-if os.environ.get("JOB_EXEC", None) is not None:
+if os.environ.get("JOB_EXEC", None) is not None and os.environ.get("JOB_EXEC", None)  != ".secure/job-exec.json":
     with open(".secure/job-exec.json", "w") as f:
         f.write(os.environ["JOB_EXEC"])
 
@@ -553,7 +553,7 @@ def predict_result(jobid=None):
             method="GET",
             response_disposition=f"attachment; filename={pred_fname}",
         )
-        
+
         out_blob = db.blob(f"predictions/{jobid}")
         folder_url = out_blob.generate_signed_url(
             version="v4",
