@@ -615,7 +615,7 @@ def predict_submit():
     try:
         fname = secure_filename(data["fname"])
         f_path = os.path.join(app.config['TEMP_UPLOAD_FOLDER'], fname)
-        model_name = secure_filename(data["model_name"])
+        model_name = secure_filename(data["model_name"])+".data.json"
         chain = secure_filename(data.get("chain", "A"))
     except:
         return " * [406] Missing info", 406
