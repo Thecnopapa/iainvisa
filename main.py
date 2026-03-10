@@ -519,6 +519,8 @@ def predict_setup(model=None):
 
 @app.route("/predict/job/<jobid>", methods=["GET"])
 def predict_result(jobid=None):
+    from google.cloud import storage
+
     jobid = secure_filename(jobid)
 
     in_info_file = f"/fts/predictions/{jobid}/in/job_info.json"
@@ -533,8 +535,26 @@ def predict_result(jobid=None):
         out_info = json.load(open(out_info_file))
     except FileNotFoundError:
         out_info = {"status": "pending"}
+    if out_info["status"] == "ok":
+        pred_path_db = out_info["prediction"]
+        if pred_path_db.startswith("/"):
+            pred_path_db = pred_path_db[1:]
+        pred_blob = db.blob(pred_path_db)
+            prediction_url = blob.generate_signed_url(
+            version="v4",
+            expiration=datetime.timedelta(days=7),
+            method="GET",
+        )
+        out_blob = db.blob(f"predictions/{jobid}")
+            folder_url = blob.generate_signed_url(
+            version="v4",
+            expiration=datetime.timedelta(days=7),
+            method="GET",
+        )
 
-    return render_template("prediction_result.html", jobid=jobid, in_info=in_info, out_info=out_info)
+
+    return render_template("prediction_result.html", jobid=jobid, in_info=in_info, out_info=out_info,
+     prediction_url=prediction_url, folder_url=folder_url)
 
 
 
