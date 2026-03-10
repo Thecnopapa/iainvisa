@@ -532,6 +532,7 @@ def predict_result(jobid=None):
     out_info_file = f"/fts/predictions/{jobid}/out/job_info.json"
     prediction_url = ""
     folder_url=""
+    viewer = ""
     try:
         in_info = json.load(open(in_info_file))
     except FileNotFoundError:
@@ -561,14 +562,39 @@ def predict_result(jobid=None):
             method="GET",
         )
 
+        viewer = molstar_viewer(prediction_url, save_folder=f"/predictions/{jobid}/out")
+
 
     return render_template("prediction_result.html", jobid=jobid, in_info=in_info, out_info=out_info,
-     prediction_url=prediction_url, folder_url=folder_url)
+     prediction_url=prediction_url, folder_url=folder_url, viewer=viewer)
 
 
-@app.route("/molstar")
-def molstar_test():
-    return render_template("molstar_test.html")
+def molstar_viewer(url, save_folder=None):
+    import molviewspec
+    builder = molviewspec.create_builder()
+    palette = molviewspec.ContinuousPalette(kind="continuous",
+                                            colors= ["blue", "green", "yellow", "red"],
+                                            mode="absolute")
+    structure = (builder
+                 #.download(url="https://www.ebi.ac.uk/pdbe/entry-files/download/1cbs_updated.cif")
+                 .download(url=url)
+                 .parse(format="mmcif")
+                 .model_structure()
+                 .component()
+                 .representation()
+                 .color_from_source(palette=palette,
+                                    field_name="B_iso_or_equiv",
+                                    schema="atom",
+                                    category_name="atom_site",
+                                    )
+                 )
+    if save_folder is not None:
+        save_path = os.path.join(save_folder, "state.mvsj")
+        with open(save_path, "w") as f:
+            f.write(builder.get_state().model_dump_json(indent=2 ,exclude_defaults=True))
+        molviewspec.mvsj_to_mvsx(save_path, save_path.replace(".mvsj", ".mvsx"))
+
+    return molviewspec.molstar_html(builder.get_state())
 
 
 
