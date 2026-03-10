@@ -530,7 +530,8 @@ def predict_result(jobid=None):
 
     in_info_file = f"/fts/predictions/{jobid}/in/job_info.json"
     out_info_file = f"/fts/predictions/{jobid}/out/job_info.json"
-
+    prediction_url = ""
+    folder_url=""
     try:
         in_info = json.load(open(in_info_file))
     except FileNotFoundError:
@@ -551,11 +552,8 @@ def predict_result(jobid=None):
             expiration=datetime.timedelta(days=7),
             method="GET",
             response_disposition=f"attachment; filename={pred_fname}",
-            headers={
-                "Content-Type": "chemical/x-cif"
-            }
-
         )
+        
         out_blob = db.blob(f"predictions/{jobid}")
         folder_url = out_blob.generate_signed_url(
             version="v4",
