@@ -28,6 +28,12 @@
         {% endfor %}
     </ul>
 
+    <h2>Previous jobs</h2>
+    <ul>
+        {% for job in jobs %}
+        <li><a href="/predict/job/{{ job }}">{{ job }}</a></li>
+        {% endfor %}
+    </ul>
 
 
 

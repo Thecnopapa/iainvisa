@@ -80,10 +80,15 @@ app.config["SECRET_KEY"] = os.environ["FLASK_KEY"]
 if os.path.exists("/fts"):
     app.config["UPLOAD_FOLDER"] = "/fts/private"
     app.config['PUBLIC_UPLOAD_FOLDER'] = "/fts/public"
+    app.config["TEMP_UPLOAD_FOLDER"] = "/fts/temp"
+    app.config["PREDICT_FOLDER"] = "/fts/predictions"
 
 else:
     app.config['UPLOAD_FOLDER'] = "uploads"
     app.config['PUBLIC_UPLOAD_FOLDER'] = "public_uploads"
+    app.config["TEMP_UPLOAD_FOLDER"] = "temp"
+    app.config["PREDICT_FOLDER"] = "predictions"
+
 
 
 if os.path.exists("/runs"):
@@ -98,17 +103,14 @@ if os.path.exists("/models"):
 else:
     app.config["MODELS_FOLDER"] = "models"
 
-if os.path.exists("/fts/temp"):
-    app.config["TEMP_UPLOAD_FOLDER"] = "/fts/temp"
 
-else:
-    app.config["TEMP_UPLOAD_FOLDER"] = "temp"
 
 os.makedirs(app.config['UPLOAD_FOLDER'], exist_ok=True)
 os.makedirs(app.config['PUBLIC_UPLOAD_FOLDER'], exist_ok=True)
 os.makedirs(app.config['RUNS_FOLDER'], exist_ok=True)
 os.makedirs(app.config['MODELS_FOLDER'], exist_ok=True)
 os.makedirs(app.config['TEMP_UPLOAD_FOLDER'], exist_ok=True)
+os.makedirs(app.config['PREDICT_FOLDER'], exist_ok=True)
 
 
 
@@ -509,9 +511,12 @@ def send_files():
 def predict_landing():
 
     models = os.listdir(app.config['MODELS_FOLDER'])
+    models = [m.replace(".data.json", "") for m in models if m.endswith(".data.json")]
+
+    jobs = sorted(os.listdir(app.config['PREDICT_FOLDER']), reverse=True)
 
 
-    return render_template("predict_landing.html", models=models)
+    return render_template("predict_landing.html", models=models, jobs=jobs)
 
 @app.route("/predict/<model>", methods=["GET"])
 def predict_setup(model=None):
