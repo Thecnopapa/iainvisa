@@ -5,6 +5,9 @@ from flask import Flask, redirect, render_template, send_from_directory, request
 from utils import *
 from werkzeug.utils import secure_filename
 from google.cloud import storage
+from google.oauth2 import service_account
+from google.oauth2.service_account import Credentials
+
 
 
 
@@ -65,9 +68,8 @@ os.environ["JOB_EXEC"] =".secure/job-exec.json"
 
 
 
-storage_client = storage.Client(project="iainvisa")
-db = storage_client.bucket("iv_fts")
-runs_db = storage_client.bucket("iv_tensorboard")
+
+
 
 
 app = Flask(__name__)
@@ -521,6 +523,9 @@ def predict_setup(model=None):
 def predict_result(jobid=None):
     from google.cloud import storage
 
+    storage_client = storage.Client(project="iainvisa", credentials=Credentials.from_service_account_file(os.environ["JOB_EXEC"]))
+    db = storage_client.bucket("iv_fts")
+
     jobid = secure_filename(jobid)
 
     in_info_file = f"/fts/predictions/{jobid}/in/job_info.json"
@@ -565,6 +570,8 @@ def predict_result(jobid=None):
 def predict_submit():
     from google.cloud import run_v2
     from google.oauth2.service_account import Credentials
+
+
 
 
     data = request.json
