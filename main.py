@@ -648,7 +648,7 @@ def predict_submit():
         "chain": chain
     }
     print("JOBINFO:", job_info)
-    json.dump(job_info, open(os.path.join(job_folder, "job_info.json"), "w"))
+    json.dump(job_info, open(os.path.join(job_folder, "job_info.json"), "w"), indent=4)
 
     try:
         client = run_v2.JobsClient(credentials=Credentials.from_service_account_file(os.environ["JOB_EXEC"]))
