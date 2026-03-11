@@ -132,6 +132,10 @@ os.makedirs(app.config['PREDICT_FOLDER'], exist_ok=True)
 def python_repo():
     return redirect("https://europe-west1-python.pkg.dev/iainvisa/python/simple/")
 
+@app.route("/apt")
+def python_repo():
+    return redirect("https://europe-west1-apt.pkg.dev/projects/iainvisa")
+
 
 @app.route("/")
 def menu():
