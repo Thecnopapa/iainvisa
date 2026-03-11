@@ -130,7 +130,7 @@ os.makedirs(app.config['PREDICT_FOLDER'], exist_ok=True)
 
 @app.route("/simple/")
 def python_repo():
-    return redirect("https://europe-west-python.pkg.dev/iainvisa/python/simple/")
+    return redirect("https://europe-west1-python.pkg.dev/iainvisa/python/simple/")
 
 
 @app.route("/")
