@@ -133,7 +133,7 @@ def python_repo():
     return redirect("https://europe-west1-python.pkg.dev/iainvisa/python/simple/")
 
 @app.route("/apt")
-def python_repo():
+def apt_repo():
     return redirect("https://europe-west1-apt.pkg.dev/projects/iainvisa")
 
 
