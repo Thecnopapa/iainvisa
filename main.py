@@ -137,11 +137,11 @@ def apt_repo():
     return redirect("https://europe-west1-apt.pkg.dev/projects/iainvisa")
 
 
-@app.route("/")
+@app.route("/menu")
 def menu():
     return render_template("menu.html")
 
-
+@app.route("/")
 @app.route("/cv")
 @app.route("/portfolio/")
 @app.route("/portfolio/academic")
