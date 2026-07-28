@@ -1,4 +1,10 @@
 
+@property --url {
+  syntax: "<url>";
+  inherits: false;
+  initial-value: none;
+}
+
 
 button{
 	color: unset;
@@ -9,6 +15,7 @@ button{
 
 a {
 	color: unset;
+	transition-duration: 0.2s !important;
 }
 
 *{
@@ -31,12 +38,13 @@ html.academic{
 }
 
 html.developer{
-	background-color: darkslateblue;
+	background-color: black;
 	color: white;
 }
 
 html.other{
-	background-color: mediumslateblue;
+	background-color: black;
+	color: white;
 }
 
 body{
@@ -59,22 +67,46 @@ body{
 
 
 #header{
-	width:100%;
-	height: 20vh;
+	width:95%;
+	height: 25vh;
 	max-height: 20vh;
 	display:flex;
 	align-items: center;
 	justify-content: space-around;
+	margin-bottom:2.5vh;
+	margin-top:2.5vh;
+}
+
+#middle-header{
+	display:flex;
+	flex-direction: column;
+	justify-content: space-around;
+	align-items: center;
+	width:100%;
 }
 
 #name{
 	font-size:5vh;
 	cursor: pointer;
+	text-align: center;
+	margin: 0em;
+}
+#slogan{
+	text-align: center;
+	margin: 0em;
 }
 
+#left-header{
+	width:100%;
+	display:flex;
+	flex-direction: column;
+	justify-content: space-around;
+	align-items: center;
+	margin-right: 1em;
+}
 #profile-pic{
-	height: 10vh;
-	width: 10vh;
+	height: 12vh;
+	width: 12vh;
 	border-radius: 50%;
 	background-position: center;
 	background-size:cover;
@@ -82,6 +114,9 @@ body{
 	cursor: pointer;
 	transition-property: transform, background-image;
 	transition-duration: 0.5s;
+	margin-left:5%;
+	margin-right:5%;
+	padding:1.5em;
 }
 #profile-pic.developer, #profile-pic.other{
 	background-image: url("/static/pics/15a67f04-8734-4016-bf71-b6851dfb8ce8.png");
@@ -90,12 +125,49 @@ body{
 	transform: scale(1.5);
 }
 
+#right-header{
+	width: 100%;
+	display: flex;
+	flex-direction: column;
+	justify-content: space-around;
+	align-items: center;
+	margin-left: 1em;
+}
+
+.external-button{
+	background-position: center;
+	background-size: 60%;
+	background-repeat: no-repeat;
+	height:2em;
+	width: 10em;
+	cursor:pointer;
+	border-radius: 5%;
+	padding:1.5em;
+	margin: 0.5em;
+
+}
+#linkedin{
+	background-image: url("/static/pics/LI-Logo.png");
+	background-color: #ffffffff;
+}
+#github{
+	background-image: url("/static/pics/GitHub_Lockup_White_Clearspace.png");
+	background-color: #000000ff;
+
+}
+#orcid{
+	background-image: url("/static/pics/ORCID_full_logo.png");
+	background-color: #ffffffff;
+	background-size: 50%;
+}
+
+
 #content {
 	width:95%;
 	border: black 1px;
 	border-radius: 10px;
-	height: 80vh;
-	max-height: 80vh;
+	height: 75vh;
+	max-height: 75vh;
 	display: flex;
 	flex-direction: column;
 }
@@ -106,6 +178,7 @@ body{
 	align-items: flex-end;
 	justify-content: space-between;
 	height: 3em;
+	margin-bottom:1em;
 
 }
 .page-button{
@@ -163,6 +236,7 @@ body{
  }
 
 .topic-title{
+	margin-top: 1em;
 	margin-bottom: 0.5em;
 }
 .topic-period{

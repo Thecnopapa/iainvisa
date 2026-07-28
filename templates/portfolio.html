@@ -1,65 +1,105 @@
 <html>
 
-	<head>
+    <head>
         <link rel="icon" type="image/x-icon" href="/static/pics/blue_world_favicon.png">
 
         <link href='/static/style/portfolio.css' as='style' rel='preload'>
         <link href='/static/scripts/portfolio.js' as='script' rel='preload'>
 
 
-		<link href='/static/style/portfolio.css' rel='stylesheet'>
+        <link href='/static/style/portfolio.css' rel='stylesheet'>
         <script defer type="text/javascript" src="/static/scripts/portfolio.js"></script>
         <title>Portfolio: {{ start }}</title>
-	</head>
+    </head>
 
 
-	<body>
-		<div id=header class="page-changer">
-			<div id=profile-pic class="page-changer" onclick="window.location.href='https://www.linkedin.com/in/iainvisa'"></div>
-			<h1 id=name onclick="window.href='/'" >Iain Visa</h1>
-			<div style=width:10dvh;></div>
-		</div>
+    <body>
+        <div id=header class="page-changer">
+            <div id="left-header">
+                <div id=profile-pic class="page-changer" onclick="profileClick()"></div>
+            </div>
+            <div id="middle-header">
+                <h1 id=name onclick="profileClick()" >Iain Visa</h1>
+                <p id=email><a href="mailto://iainvisa@gmail.com">iainvisa@gmail.com</a></p>
+                <p id=slogan>AI-vegan coding</p>
+            </div>
 
-		<div id=content>
-			<div id=page-selector>
-				<button class="page-button page-academic {{ 'current' if not start or start=='academic' }}" onclick="goToPage('academic')">Academic</button>
+            <div id="right-header">
+                
+                <button id=linkedin class=external-button></button>
+                <button id=github class=external-button></button>
+                <button id=orcid class=external-button></button>
+
+            </div>
+        </div>
+
+        <div id=content>
+            <div id=page-selector>
+                <button class="page-button page-academic {{ 'current' if not start or start=='academic' }}" onclick="goToPage('academic')">Academic</button>
                 <button class="page-button page-developer  {{ 'current' if start=='developer' }}" onclick="goToPage('developer')">Developer</button>
                 <button class="page-button page-other {{ 'current' if start=='other' }}" onclick="goToPage('other')">Other</button>
 
-			</div>
+            </div>
 
-			<div id=academic class="portfolio-page page-academic {{ 'current' if not start or start=='academic' }}">
-				<h2 class=subheader>Structural Biologist</h2>
-				<p class=description>PhD Student with a degree and master in Biochemistry, and a Molecular Biotechnology
+            <div id=academic class="portfolio-page page-academic {{ 'current' if not start or start=='academic' }}">
+                <h2 class=subheader>Structural Biologist</h2>
+                <p class=description>PhD Student with a degree and master in Biochemistry, and a Molecular Biotechnology
 master. I have a strong interest in the study of proteins, especially their structure and interactions, topic in which I am developing my PhD.<br><br>
 I have experimental and computational experience from the two master theses, providing me with
 a wide range of experimental and computational skills, that I can use on their own or in
 combination.
                     <br><br>Currently a PhD Student at Universitat de Barcelona in Eva Estébanez's research group working on Nuclear Receptor multimetric assemblies with a computational and Machine Learning approach, in collaboration with Isabel Usón's research group. Currently I am looking for a PhD position, ideally related to the study of protein-
 protein interactions.</p>
-                <h3 class=topic-header>Experience</h3>
+                <h3 class=topic-header>Previous Experience</h3>
                 <div class="topic-list">
-                    <h4 class=topic-title>Master thesis</h4>
-                    <h5 class=topic-period>Jun 2023-Jun2024</h5>
-                    <p class=topic-description>Description</p>
+                    <h4 class=topic-title>Master thesis @ IBMB / Universitat de Barcelona</h4>
+                    <h5 class=topic-period>Oct 2024 - Jul 2025 </h5>
+                    <p class=topic-description>Computational project on the development of <a href="http://github.com/Thecnopapa/ProjectDimer" target="_blank">ProjectDimer</a>: a tool for protein-protein interaction classification. The project consisted of the development of a Python-based software capable of analysing and classifying interactions from protein crystals, particularly, nuclear receptor dimerization.<br>
+                    Working under the supervision of Isabel Uson and Eva Estebanez.</p>
                     <ul class=topic-bullets>
-                        <li>Skill 1</li>
+                        <li>Python</li>
+                        <li>Bioinformatics</li>
+                        <li>Structural Biology</li>
+                        <li>Computational Biology</li>
+                        <li>Biopython</li>
+                    </ul>
+
+                    <h4 class=topic-title>Master thesis @ University of York</h4>
+                    <h5 class=topic-period>Sep 2023 - Jun 2024</h5>
+                    <p class=topic-description>Experimental project on the synthesis and analysis of mutant phosphoribitol-transferases TarK and TarL which are involved in wall teichoic acid synthesis in B. subtilis.<br>Working under the supervision of Dr Lianne Willems in the Chemical Biology Lab at University of York.</p>
+                    <ul class=topic-bullets>
+                        <li>Mutagenesis</li>
+                        <li>Bacterial transformation</li>
+                        <li>Protein expression and purification</li>
+                        <li>Enzymatic activity assays</li>
                     </ul>
                 </div>
+                <h3 class=topic-header>Education</h3>
+                <div class="topic-list">
+                    <h4 class=topic-title>Master in Molecular Biotechnology @ Universitat de Barcelona</h4>
+                    <h5 class=topic-period>Sep 2024 - Jun 2025 </h5>
 
-			</div>
+                    <h4 class=topic-title>Master in Biochemistry (integrated) @ University of York</h4>
+                    <h5 class=topic-period>Sep 2023 - Jun 2024</h5>
+
+                    <h4 class=topic-title>Biochemistry @ University of York</h4>
+                    <h5 class=topic-period>Sep 2020 - Jun 2024</h5>
+                    
+                </div>
+
+            </div>
             <div id=developer class="portfolio-page page-developer {{ 'current' if not start or start=='developer' }}">
                 <h2 class=subheader>Website Developer</h2>
                 <p class=description>Web developer as a hobby, back-end, front-end databases, authentication... <br>
-                All vanilla HTML CSS and JS, with a flask backend and hosted with google. Still learning tho.</p>
+                All vanilla HTML CSS and JS, with a flask backend and hosted with google. Still learning tho, but rest assured no AI slop in the area.</p>
                 <h3 class=topic-header>Successfull projects so far</h3>
                 <div class="topic-list">
                         <h4 class=topic-title>PANSON Joieria</h4>
                         <h5 class=topic-period>Apr 2024-Nov 2024 (still running)</h5>
                         <a class=topic-link href="https://pansonjoieria.com">pansonjoieria.com</a>
                         <p class=topic-description>Website and online shop for the homemade jewelry brand PANSON. The project features:</p>
-         				<ul class=topic-bullets>
-         					<li>Front-end (mostly designed by client): HTML, CSS, and JS (all vanilla)</li>
+                        <ul class=topic-bullets>
+                            <li>Front-end (mostly designed by client): HTML, CSS, and JS (all vanilla)</li>
                             <li>Back-end: Flask (wit Jinja templates)</li>
                             <li>Hosting: Google Cloud</li>
                             <li>Database: Firebase/Firestore/Google Cloud</li>
@@ -68,29 +108,43 @@ protein interactions.</p>
                             <li>Workflow integration: Integrated tracking of orders with Trello</li>
                             <li>Domains: Custom domain setup and admin + email configuration</li>
                             <li>Running cost: 1€/month!</li>
-         				</ul>
+                            <li>No AI slop (only human)</li>
+                        </ul>
                 </div>
             </div>
 
 
             <div id=other class="portfolio-page page-other {{ 'current' if not start or start=='other' }}">
-         				<h2 class=subheader>Other side projects</h2>
-         				<p class=description>Here are some other projects that I found interesting at some point. Mostly late-night ideas. All recent as I've been coding since 2024.</p>
-         				<h3 class=topic-header>Successfull Projects so far</h3>
-         				<h4 class=topic-title>PANSON Joieria</h4>
-         				<h5 class=topic-period>Apr 2024-Nov 2024 (still running)</h5>
-         				<p class=topic-description>Website and online shop for the homemade jewelry brand PANSON.</p>
-         				<ul class=topic-bullets>
-         					<li>Skill 1</li>
-         				</ul>
+                <h2 class=subheader>Other side projects</h2>
+                <p class=description>Here are some other projects that I found interesting at some point. Mostly late-night ideas. All recent as I've been coding since 2024.</p>
+                <h3 class=topic-header>Current Projects</h3>
+                <div class="topic-list">
+                    <h4 class=topic-title><a href="http://github.com/Thecnopapa/bioiain" target="_blank">Bioiain</a></h4>
+                    <h5 class=topic-period>Started Oct 2025</h5>
+                    <p class=topic-description>Structural biology Python library and framework</p>
+                    <ul class=topic-bullets>
+                        <li>Computational structural biology framework</li>
+                        <li>Protein structure processing</li>
+                        <li>Machine learning framework</li>
+                        <li>Published in PyPi</li>
+                    </ul>
 
-         			</div>
+                    <h4 class=topic-title><a href="http://github.com/Thecnopapa/pygame" target="_blank">PyGame</a></h4>
+                    <h5 class=topic-period>Started July 2026</h5>
+                    <p class=topic-description>Python-powered metroidvania with art by <a href="https://github.com/raynoski" target="_blank">@raynoski</a></p>
+                    <ul class=topic-bullets>
+                        <li>Python backend (pygame)</li>
+                        <li>No AI (maybe on some placeholder art though)</li>
+                    </ul>
+                </div>
 
-		</div>
+            </div>
+
+        </div>
 
 
 
-	</body>
+    </body>
 
 
 
