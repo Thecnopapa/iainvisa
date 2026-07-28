@@ -48,7 +48,7 @@ function updatePage() {
 }
 
 function profileClick(){
-    if (currentPage === "Academic"){
+    if (currentPage === "academic"){
         window.open("https://www.linkedin.com/in/iainvisa", "_blank")
     } else {
         window.open("https://github.com/Thecnopapa", "_blank")
